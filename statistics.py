@@ -14,30 +14,38 @@ class StatImage(object):
 
         self._loss = []
         self._error = []
+        self._error_top5 = []
         self._weight_norm = []
         self._gradient_norm = []
         self._epochs = args.epochs
         self._log = args
         self._sim_num = args.sim_num
-        # self._folder = params.folder_name
         self._iterations_per_epoch = args.iterations_per_epoch
+        self._dataset = args.dataset
 
     def save_loss(self, loss):
         self._loss.append(loss)
 
     def save_error(self, error):
-        self._error.append(error)
+        self._error.append(error/100)
+
+    def save_error_top5(self, error):
+        self._error_top5.append(error/100)
 
     def save_weight_norm(self, weights_dict):
         norm = torch.zeros(1)
-        for name in weights_dict:
-            norm = norm + torch.sum((weights_dict[name]).view(-1, 1) ** 2)
+        if self._dataset == 'image_net':
+            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2
+        else:
+            norm = norm + weights_dict['module.fc.weight'].norm() ** 2
         self._weight_norm.append(torch.sqrt(norm).numpy()[0])
 
     def save_gradient_norm(self, weights_dict):
         norm = torch.zeros(1)
-        for name in weights_dict:
-            norm = norm + torch.sum((weights_dict[name]).view(-1, 1) ** 2)
+        if self._dataset == 'image_net':
+            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2
+        else:
+            norm = norm + weights_dict['module.fc.weight'].norm() ** 2
         self._gradient_norm.append(torch.sqrt(norm).numpy()[0])
 
     def _visualize_weight_norm(self, handle=None, legend=None, color=None, resolution=None):
@@ -76,7 +84,9 @@ class StatImage(object):
     def _visualize_error(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
+        # error = [e.cpu().numpy() for e in self._error]
         error = self._error
+        # error = self._error
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -90,3 +100,21 @@ class StatImage(object):
         self._visualize_error(handle_error, legend, color, line_dash, resolution)
         self._visualize_weight_norm(handle_weight_norm, legend, color, resolution)
         self._visualize_gradient_norm(handle_gradient_norm, legend, color, resolution)
+
+    def get_scores(self):
+        error = self._error
+        # use 15% of last epochs
+        start_epoch = int(self._epochs * 0.85)
+        error = error[start_epoch:]
+        min_score = np.min(error)*100
+        mean_score = np.mean(error)*100
+        if self._dataset == 'image_net':
+            error_top5 = self._error_top5
+            error_top5 = error_top5[start_epoch:]
+            min_score_top5 = min(error_top5)*100
+            mean_score_top5 = np.mean(error_top5)*100
+            # return min_score, mean_score, min_score_top5, mean_score_top5
+        return min_score, mean_score
+
+    def generic_future(self):
+        pass

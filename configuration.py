@@ -19,29 +19,40 @@ def configuration():
                         help='weight decay (default: 5e-4)')
     parser.add_argument('--layers', default=28, type=int,
                         help='total number of layers (default: 28)')
-    parser.add_argument('--widen-factor', default=10, type=int,
-                        help='widen factor (default: 10)')
+    parser.add_argument('--widen-factor', default=2, type=int,
+                        help='widen factor (default: 2)')
     parser.add_argument('--droprate', default=0, type=float,
                         help='dropout probability (default: 0.0)')
     parser.add_argument('--no-augment', dest='augment', action='store_false',
                         help='whether to use standard augmentation (default: True)')
     parser.add_argument('--resume', default='', type=str,
                         help='path to latest checkpoint (default: none)')
-    parser.add_argument('--name', default='WideResNet-28-10', type=str,
+    parser.add_argument('--name', default='WideResNet-28-2', type=str,
                         help='name of experiment')
     parser.add_argument('--sim_num', default='1', type=int,
                         help='simulation id')
     parser.add_argument('--workers_num', default=1, type=int,
                         help='number of workers')
-    parser.add_argument('--grad_clip', default=2, type=float,
+    parser.add_argument('--grad_clip', default=1000, type=float,
                         help='gradient clipping threshold')
+    parser.add_argument('--gbn', dest='gbn', action='store_true',
+                        help='whether to use ghost batch normalization (default: False)')
+    parser.add_argument('--pbar', dest='bar', action='store_true',
+                        help='show progress bar (default: False)')
     parser.add_argument('--id', default=2000, type=int,
                         help='simulation number')
-    # parser.add_argument('--gpu_num', default=3, type=int,
-    #                     help='gpu number')
     parser.add_argument('--optimizer', default='asynchronous', type=str,
                         help='type of optimizer (synchronous/asynchronous/elastic)')
+    parser.add_argument('--tau', default=1, type=int,
+                        help='tau communication for elastic')
+    parser.add_argument('--rho', default=2.5, type=int,
+                        help='rho value for elastic')
     parser.set_defaults(augment=True)
     args = parser.parse_args()
-    args.iterations_per_epoch = 50000 // args.batch_size
+    if args.dataset == 'cifar10' or args.dataset == 'cifar100':
+        args.iterations_per_epoch = 50000 // args.batch_size
+    else:
+        args.iterations_per_epoch = 1275776 // args.batch_size
+        args.lr = 0.01
+    args.notes = ''
     return args

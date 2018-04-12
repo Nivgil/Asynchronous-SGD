@@ -1,13 +1,10 @@
 import os
 import json
 import pickle
-import pandas
-from bokeh.embed import file_html
-from bokeh.resources import CDN
-from bokeh.layouts import column, row
-from bokeh.plotting import figure, curdoc, output_notebook, show, save
+from bokeh.plotting import figure
 from bokeh.palettes import Category10 as palette
 from bokeh.models import NumeralTickFormatter
+import argparse
 
 
 def create_graphs(sim_num=None, variable=None, resolution='epoch'):
@@ -33,13 +30,13 @@ def create_graphs(sim_num=None, variable=None, resolution='epoch'):
     p_loss.background_fill_color = "#fafafa"
 
     p_weight_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
-                    x_axis_label=x_axis_label, y_axis_label='||w(t)||',
-                    title="The Norm of w(t)", x_axis_type='log', y_axis_type='log')
+                           x_axis_label=x_axis_label, y_axis_label='||w(t)||',
+                           title="The Norm of w(t)", x_axis_type='log', y_axis_type='log')
     p_weight_norm.background_fill_color = "#fafafa"
 
     p_gradient_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
-                    x_axis_label=x_axis_label, y_axis_label='||g||',
-                    title="The Norm of Gradients", x_axis_type='log', y_axis_type='log')
+                             x_axis_label=x_axis_label, y_axis_label='||g||',
+                             title="The Norm of Gradients", x_axis_type='log', y_axis_type='log')
     p_gradient_norm.background_fill_color = "#fafafa"
 
     p_error = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
@@ -56,11 +53,8 @@ def create_graphs(sim_num=None, variable=None, resolution='epoch'):
             stats_test, stats_train = pickle.load(pickle_in)
         with open(os.path.join(CONFIGURATIONS_DIR, folder_name, file + '.log'), 'rb') as log_file:
             params_dict = json.load(log_file)
-        # log_table = Table(params_dict)
-        # for key in params_dict.keys():
-        #     log_table.table[key].append(params_dict[key])
         idx += 1
-        legend = params_dict['optimizer']+'_'+str(params_dict['batch_size'])+'_'+str(params_dict['workers_num'])
+        legend = params_dict['optimizer'] + '_' + str(params_dict['batch_size']) + '_' + str(params_dict['workers_num'])
         stats_train.export_data(handle_loss=p_loss,
                                 handle_error=p_error,
                                 handle_weight_norm=p_weight_norm,
@@ -69,7 +63,7 @@ def create_graphs(sim_num=None, variable=None, resolution='epoch'):
                                 color=colors[idx % 10],
                                 line_dash='solid',
                                 resolution=resolution)
-        stats_test.export_data(handle_loss=p_loss,
+        min_score_test, mean_score_test = stats_test.export_data(handle_loss=p_loss,
                                handle_error=p_error,
                                legend=legend,
                                color=colors[idx % 10],
@@ -83,28 +77,7 @@ def create_graphs(sim_num=None, variable=None, resolution='epoch'):
     p_gradient_norm.legend.click_policy = "hide"
     p_gradient_norm.legend.location = "bottom_left"
 
-    return [p_loss, p_error, p_weight_norm, p_gradient_norm]
-
-# def hover(hover_color="#ffff99"):
-#     return dict(selector="tr:hover",
-#                 props=[("background-color", "%s" % hover_color)])
-#
-#
-# class Singleton(type):
-#     _instances = {}
-#
-#     def __call__(cls, *args, **kwargs):
-#         if cls not in cls._instances:
-#             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-#         return cls._instances[cls]
-#
-#
-# class Table(metaclass=Singleton):
-#     def __init__(self, params_dict=None):
-#         keys = params_dict.keys()
-#         self.table = dict()
-#         for key in keys:
-#             self.table[key] = list()
+    return [p_loss, p_error, p_weight_norm, p_gradient_norm, min_score_test, mean_score_test]
 
 
 if __name__ == '__main__':

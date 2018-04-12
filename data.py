@@ -33,11 +33,11 @@ def load_data(args):
 
         trainset = datasets.ImageFolder(root=root + 'train', transform=transform_train)
         train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
-                                                   shuffle=True)
+                                                   shuffle=True, num_workers=16, pin_memory=True)
 
         testset = datasets.ImageFolder(root=root + 'val', transform=transform_test)
-        val_loader = torch.utils.data.DataLoader(testset, batch_size=1024,
-                                                 shuffle=True)
+        val_loader = torch.utils.data.DataLoader(testset, batch_size=1280,
+                                                 shuffle=True, num_workers=16, pin_memory=True)
     else:
         print('Loading CIFAR' + str(args.dataset == 'cifar10' and 10 or 100) + ' - ', end='')
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -64,7 +64,7 @@ def load_data(args):
             normalize
         ])
 
-        kwargs = {'num_workers': 1, 'pin_memory': True}
+        kwargs = {'num_workers': 4, 'pin_memory': True}
         assert (args.dataset == 'cifar10' or args.dataset == 'cifar100')
         train_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
@@ -72,6 +72,6 @@ def load_data(args):
             batch_size=args.batch_size, shuffle=True, **kwargs)
         val_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
-            batch_size=1024, shuffle=True, **kwargs)
+            batch_size=1280, shuffle=True, **kwargs)
 
     return train_loader, val_loader
