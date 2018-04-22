@@ -34,7 +34,7 @@ class StatImage(object):
 
     def save_weight_norm(self, weights_dict):
         norm = torch.zeros(1)
-        if self._dataset == 'image_net':
+        if self._dataset == 'imagenet':
             norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2
         else:
             norm = norm + weights_dict['module.fc.weight'].norm() ** 2
@@ -42,7 +42,7 @@ class StatImage(object):
 
     def save_gradient_norm(self, weights_dict):
         norm = torch.zeros(1)
-        if self._dataset == 'image_net':
+        if self._dataset == 'imagenet':
             norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2
         else:
             norm = norm + weights_dict['module.fc.weight'].norm() ** 2
@@ -108,7 +108,7 @@ class StatImage(object):
         error = error[start_epoch:]
         min_score = np.min(error)*100
         mean_score = np.mean(error)*100
-        if self._dataset == 'image_net':
+        if self._dataset == 'imagenet':
             error_top5 = self._error_top5
             error_top5 = error_top5[start_epoch:]
             min_score_top5 = min(error_top5)*100

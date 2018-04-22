@@ -7,41 +7,47 @@ from bokeh.models import NumeralTickFormatter
 import argparse
 
 
-def create_graphs(sim_num=None, variable=None, resolution='epoch'):
+def create_graphs(sim_num=None, resolution='epoch', linear=False):
     CONFIGURATIONS_DIR = os.path.join(os.path.dirname(__file__))
     if sim_num is None:
         parser = argparse.ArgumentParser()
         parser.add_argument('--sim_num', action='store')
         parser.add_argument('--resolution', action='store', default='iteration')
+        parser.add_argument('--linear', dest='scale', action='store_true')
         args = vars(parser.parse_args())
         sim_num = args['sim_num']
         resolution = args['resolution']
+        linear = args['scale']
     folder_name = 'simulation_{}'.format(sim_num)
     colors = palette[10]
-
     if resolution == 'epoch':
         x_axis_label = 't [Epochs]'
     else:
         x_axis_label = 'Iterations'
 
+    if linear is True:
+        x_scale = 'linear'
+    else:
+        x_scale = 'log'
+
     p_loss = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                     x_axis_label=x_axis_label, y_axis_label='L(w(t))',
-                    title="Training & Test Loss", y_axis_type='log', x_axis_type='log')
+                    title="Training & Test Loss", y_axis_type='log', x_axis_type=x_scale)
     p_loss.background_fill_color = "#fafafa"
 
     p_weight_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                            x_axis_label=x_axis_label, y_axis_label='||w(t)||',
-                           title="The Norm of w(t)", x_axis_type='log', y_axis_type='log')
+                           title="The Norm of w(t)", x_axis_type=x_scale, y_axis_type=x_scale)
     p_weight_norm.background_fill_color = "#fafafa"
 
     p_gradient_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                              x_axis_label=x_axis_label, y_axis_label='||g||',
-                             title="The Norm of Gradients", x_axis_type='log', y_axis_type='log')
+                             title="The Norm of Gradients", x_axis_type=x_scale, y_axis_type='log')
     p_gradient_norm.background_fill_color = "#fafafa"
 
     p_error = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                      x_axis_label=x_axis_label, y_axis_label='Error Rate',
-                     title="Training & Test Error", x_axis_type='log')
+                     title="Training & Test Error", x_axis_type=x_scale)
     p_error.background_fill_color = "#fafafa"
     p_error.yaxis[0].formatter = NumeralTickFormatter(format="0.0%")
 
@@ -63,12 +69,13 @@ def create_graphs(sim_num=None, variable=None, resolution='epoch'):
                                 color=colors[idx % 10],
                                 line_dash='solid',
                                 resolution=resolution)
-        min_score_test, mean_score_test = stats_test.export_data(handle_loss=p_loss,
+        stats_test.export_data(handle_loss=p_loss,
                                handle_error=p_error,
                                legend=legend,
                                color=colors[idx % 10],
                                line_dash='dashed',
                                resolution=resolution)
+        min_score_test, mean_score_test = stats_test.get_scores()
     p_loss.legend.click_policy = "hide"
     p_loss.legend.location = 'bottom_left'
     p_error.legend.click_policy = "hide"
@@ -77,7 +84,7 @@ def create_graphs(sim_num=None, variable=None, resolution='epoch'):
     p_gradient_norm.legend.click_policy = "hide"
     p_gradient_norm.legend.location = "bottom_left"
 
-    return [p_loss, p_error, p_weight_norm, p_gradient_norm, min_score_test, mean_score_test]
+    return [p_loss, p_error, p_weight_norm, p_gradient_norm], min_score_test, mean_score_test
 
 
 if __name__ == '__main__':

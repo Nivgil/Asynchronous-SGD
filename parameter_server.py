@@ -22,6 +22,7 @@ class ParameterServer(object):
         self._current_lr = args.lr
         self._lr_points = list()
         alpha = args.workers_num * args.batch_size // batch_baseline
+        alpha = 1
         if args.dataset == 'cifar10' or args.dataset == 'cifar100':
             self._lr_points.append(60 * alpha)
             self._lr_points.append(120 * alpha)
@@ -72,9 +73,6 @@ class ParameterServer(object):
         lr = self._lr
         for r in self._lr_points:
             lr *= 0.2 ** int(epoch >= r)
-        # lr = self._lr * ((0.2 ** int(epoch >= self._lr_points[0])) *
-        #                  (0.2 ** int(epoch >= self._lr_points[1])) *
-        #                  (0.2 ** int(epoch >= self._lr_points[2])))
         if self._current_lr != lr:
             print('Adjusting Learning Rate to [{0:.5f}]'.format(lr))
             self._current_lr = lr

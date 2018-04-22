@@ -14,7 +14,7 @@ def configuration():
     parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                         help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
-    parser.add_argument('--nesterov', default=True, type=bool, help='nesterov momentum')
+    parser.add_argument('--nesterov', default=False, type=bool, help='nesterov momentum')
     parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
                         help='weight decay (default: 5e-4)')
     parser.add_argument('--layers', default=28, type=int,
@@ -41,6 +41,8 @@ def configuration():
                         help='show progress bar (default: False)')
     parser.add_argument('--id', default=2000, type=int,
                         help='simulation number')
+    parser.add_argument('--save', default=100, type=int,
+                        help='save simulation state every X epochs')
     parser.add_argument('--optimizer', default='asynchronous', type=str,
                         help='type of optimizer (synchronous/asynchronous/elastic)')
     parser.add_argument('--tau', default=1, type=int,
@@ -54,5 +56,7 @@ def configuration():
     else:
         args.iterations_per_epoch = 1275776 // args.batch_size
         args.lr = 0.01
+        args.save = 1
+        args.name = 'alexnet'
     args.notes = ''
     return args

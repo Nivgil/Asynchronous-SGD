@@ -10,7 +10,7 @@ from PIL import ImageFile
 
 
 def load_data(args):
-    if args.dataset == 'image_net':
+    if args.dataset == 'imagenet':
         print('Loading ImageNet - ', end='')
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -35,9 +35,9 @@ def load_data(args):
         train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
                                                    shuffle=True, num_workers=16, pin_memory=True)
 
-        testset = datasets.ImageFolder(root=root + 'val', transform=transform_test)
-        val_loader = torch.utils.data.DataLoader(testset, batch_size=1280,
-                                                 shuffle=True, num_workers=16, pin_memory=True)
+        testset = datasets.ImageFolder(root=root + 'val_new', transform=transform_test)
+        val_loader = torch.utils.data.DataLoader(testset, batch_size=512,
+                                                 shuffle=False, num_workers=4, pin_memory=True)
     else:
         print('Loading CIFAR' + str(args.dataset == 'cifar10' and 10 or 100) + ' - ', end='')
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],

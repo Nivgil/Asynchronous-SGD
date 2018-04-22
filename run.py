@@ -14,7 +14,7 @@ def main():
     args = configuration()
     base_name = args.name
 
-    for idx in range(1, 4):
+    for idx in range(1, 2):
         # args.id = 1000
         args.sim_num = idx * 10
         # args.batch_size = 128
