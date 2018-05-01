@@ -37,7 +37,7 @@ def load_data(args):
 
         testset = datasets.ImageFolder(root=root + 'val_new', transform=transform_test)
         val_loader = torch.utils.data.DataLoader(testset, batch_size=512,
-                                                 shuffle=False, num_workers=4, pin_memory=True)
+                                                 shuffle=False, num_workers=8, pin_memory=True)
     else:
         print('Loading CIFAR' + str(args.dataset == 'cifar10' and 10 or 100) + ' - ', end='')
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -72,6 +72,6 @@ def load_data(args):
             batch_size=args.batch_size, shuffle=True, **kwargs)
         val_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
-            batch_size=1280, shuffle=True, **kwargs)
+            batch_size=512, shuffle=False, **kwargs)
 
     return train_loader, val_loader

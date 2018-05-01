@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torchvision.transforms as transforms
+from gbn import GhostBatchNorm
 
 __all__ = ['alexnet']
 
@@ -12,7 +13,8 @@ class AlexNetOWT_BN(nn.Module):
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2,
                       bias=False),
             nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.BatchNorm2d(64),
+            GhostBatchNorm(64, 8),
+            # nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.Conv2d(64, 192, kernel_size=5, padding=2, bias=False),
             nn.MaxPool2d(kernel_size=3, stride=2),

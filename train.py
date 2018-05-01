@@ -4,12 +4,12 @@ import torch
 import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
+import torchvision
 from progress.bar import IncrementalBar
 
 from densenet import densenet
 from wideresnet import WideResNet
 from alexnet import alexnet
-from simple_model import SimpleModel
 
 from data import load_data
 from parameter_server import ParameterServer
@@ -17,7 +17,7 @@ from statistics import Statistics
 
 
 def main(args):
-    time_stamp = time.time()
+    time_stamp = '{:.0f}'.format(time.time() % 100000)
     if torch.cuda.is_available() is True:
         print('Utilizing GPU')
         # torch.cuda.set_device(args.gpu_num)
@@ -25,13 +25,15 @@ def main(args):
     # create model
     if args.dataset == 'imagenet':
         model = alexnet()
-        # model = torchvision.models.resnet18()
+        # model = torchvision.models.resnet50()
+        args.iterations_per_epoch = len(train_loader.dataset.imgs) // args.batch_size
         val_len = len(val_loader.dataset.imgs) // 512
     else:
         model = WideResNet(args.layers, args.dataset == 'cifar10' and 10 or 100,
                            args.widen_factor, dropRate=args.droprate)
         # model = densenet(depth=100)
         # args.wd = 1e-4
+        args.iterations_per_epoch = len(train_loader.dataset.train_labels) // args.batch_size
         val_len = len(val_loader.dataset.test_labels) // 1280
 
     # get the number of model parameters
@@ -79,6 +81,7 @@ def main(args):
         # train for one epoch
         train_loss, train_error = train(train_loader, model, criterion, server, epoch, args.workers_num, args.grad_clip,
                                         repeat, train_bar)
+
         train_time = time.time() - train_time
         if args.bar is True:
             train_bar.finish()
@@ -89,9 +92,11 @@ def main(args):
         val_loss, val_error = validate(val_loader, model, criterion, server, val_statistics, val_bar)
         train_statistics.save_loss(train_loss)
         train_statistics.save_error(train_error)
+        train_statistics.save_weight_mean_dist(server.get_workers_mean_statistics())
+        train_statistics.save_weight_master_dist(server.get_workers_master_statistics())
+        train_statistics.save_mean_master_dist(server.get_mean_master_dist())
         train_statistics.save_weight_norm(server.get_server_weights())
         train_statistics.save_gradient_norm(server.get_server_gradients())
-        # train_loss, train_error = validate(train_loader, model, criterion, server, train_statistics, top_k, val_bar)
         val_time = time.time() - val_time
         if args.bar is True:
             val_bar.finish()
@@ -99,12 +104,12 @@ def main(args):
         print('Epoch [{0:1d}]: Train: Time [{1:.2f}], Loss [{2:.3f}], Error[{3:.3f}] |'
               ' Test: Time [{4:.2f}], Loss [{5:.3f}], Error[{6:.3f}]'
               .format(epoch, train_time, train_loss, train_error, val_time, val_loss, val_error))
-        if epoch % args.save == 0:
+        if epoch % 1 == 0:
             save_checkpoint({'epoch': epoch + 1,
                              'state_dict': model.state_dict(),
                              'val_stats': val_statistics,
                              'train_stats': train_statistics,
-                             'server': server}, sim_name=(args.name + str(time_stamp)))
+                             'server': server}, sim_name=(args.name + time_stamp + '_' + str(epoch)))
         train_time = time.time()
 
     return train_statistics, val_statistics
@@ -114,21 +119,33 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
     """Train for one epoch on the training set"""
     train_error = AverageMeter()
     train_loss = AverageMeter()
+    backward_pass, forward_pass, param_push, grad_pull, full_pass, param_pull, batch_loading, variable_tran = 0, 0, 0, 0, 0, 0, 0, 0
     # switch to train mode
     model.train()
+    time_1 = time.time()
     for i, (input, target) in enumerate(train_loader):
+        batch_loading += time.time() - time_1
         current_worker = i % workers_number
+        time_3 = time.time()
         set_model_weights(server.pull(current_worker), model)
+        param_pull += time.time() - time_3
+        time_2 = time.time()
         target = target.cuda(async=True)
         input = input.cuda()
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
+        variable_tran += time.time() - time_2
         # compute output
         model.zero_grad()
+        time_4 = time.time()
         for t in range(0, repeat):
+            time_7 = time.time()
             output = model(input_var)
+            forward_pass += time.time() - time_7
             loss = criterion(output, target_var)
+            time_8 = time.time()
             loss.backward()
+            backward_pass += time.time() - time_8
         if repeat > 1:
             normalize_gradients(model, repeat)
         if grad_clip < 1000:
@@ -136,19 +153,26 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
         train_loss.update(loss.data[0], input.size(0))
         train_error.update(100 - prec1[0], input.size(0))
+        full_pass += time.time() - time_4
+        time_5 = time.time()
         gradients = get_model_gradients(model)
+        grad_pull += time.time() - time_5
         tau = (i - current_worker) / workers_number + 1
-        server.push(current_worker, gradients, epoch, tau=tau)
+        time_6 = time.time()
+        server.push(current_worker, gradients, epoch, tau=tau, iteration=i)
+        param_push += time.time() - time_6
         if bar is not None:
             bar.next()
-    # print('Completed {} Iterations'.format(i))
+        time_1 = time.time()
+    # print('\nCompleted {} Iterations'.format(i))
     # print('Batch Loading - [{:.3f}]sec'.format(batch_loading))
     # print('param pulling - [{:.3f}]sec'.format(param_pull))
     # print('variable tran - [{:.3f}]sec'.format(variable_tran))
-    # print('forward pass  - [{:.3f}]sec'.format(forward))
-    # print('backward pass - [{:.3f}]sec'.format(backward))
+    # print('full pass     - [{:.3f}]sec'.format(full_pass))
     # print('grad pulling  - [{:.3f}]sec'.format(grad_pull))
     # print('param pushing - [{:.3f}]sec'.format(param_push))
+    # print('forward pass  - [{:.3f}]sec'.format(forward_pass))
+    # print('backward pass - [{:.3f}]sec'.format(backward_pass))
     return train_loss.avg, train_error.avg
 
 
@@ -163,13 +187,11 @@ def validate(data_loader, model, criterion, server, statistics, bar):
     error = AverageMeter()
     error_5 = AverageMeter()
     total_loss = AverageMeter()
-    print('evaluating')
     for i, (input, target) in enumerate(data_loader):
         target = target.cuda(async=True)
         input = input.cuda()
         input_var = torch.autograd.Variable(input, volatile=True)
         target_var = torch.autograd.Variable(target, volatile=True)
-        print('batch loaded')
         # compute output
         output = model(input_var)
         loss = criterion(output, target_var)
@@ -179,7 +201,6 @@ def validate(data_loader, model, criterion, server, statistics, bar):
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
         error.update(100 - prec1[0], input.size(0))
         error_5.update(100 - prec5[0], input.size(0))
-        print('iteration {}'.format(i))
         if bar is not None:
             bar.next()
 
@@ -235,7 +256,7 @@ def accuracy(output, target, topk=(1,)):
 def save_checkpoint(state, filename='checkpoint.pth.tar', sim_name=''):
     """Saves checkpoint to disk"""
     name = sim_name
-    directory = "backups/%s/" % name
+    directory = '/media/niv/backups/%s/' % name
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = directory + filename

@@ -39,6 +39,10 @@ def configuration():
                         help='whether to use ghost batch normalization (default: False)')
     parser.add_argument('--pbar', dest='bar', action='store_true',
                         help='show progress bar (default: False)')
+    parser.add_argument('--no_regime', dest='regime', action='store_true',
+                        help='train without regime adaptation')
+    parser.add_argument('--fast_im', dest='fast_im', action='store_true',
+                        help='1 hour image net training regime')
     parser.add_argument('--id', default=2000, type=int,
                         help='simulation number')
     parser.add_argument('--save', default=100, type=int,
@@ -52,9 +56,10 @@ def configuration():
     parser.set_defaults(augment=True)
     args = parser.parse_args()
     if args.dataset == 'cifar10' or args.dataset == 'cifar100':
-        args.iterations_per_epoch = 50000 // args.batch_size
+        # args.iterations_per_epoch = 50000 // args.batch_size
+        pass
     else:
-        args.iterations_per_epoch = 1275776 // args.batch_size
+        # args.iterations_per_epoch = 1275776 // args.batch_size
         args.lr = 0.01
         args.save = 1
         args.name = 'alexnet'

@@ -44,6 +44,11 @@ def create_graphs(sim_num=None, variable=None, resolution=None):
                              title="The Norm of Gradients", x_axis_type='log', y_axis_type='log')
     p_gradient_norm.background_fill_color = "#fafafa"
 
+    p_weights_distances = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
+                                 x_axis_label=x_axis_label, y_axis_label='Distance',
+                                 title="Distance of workers from mean")
+    p_weights_distances.background_fill_color = "#fafafa"
+
     p_error = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                      x_axis_label=x_axis_label, y_axis_label='Error Rate',
                      title="Training & Test Error", x_axis_type='log')
@@ -67,6 +72,7 @@ def create_graphs(sim_num=None, variable=None, resolution=None):
                                 handle_error=p_error,
                                 handle_weight_norm=p_weight_norm,
                                 handle_gradient_norm=p_gradient_norm,
+                                handle_distance=p_weights_distances,
                                 legend=legend,
                                 color=colors[idx % 10],
                                 line_dash='solid',
@@ -98,7 +104,7 @@ def create_graphs(sim_num=None, variable=None, resolution=None):
         dict(selector="caption", props=[("caption-side", "bottom")])
     ]
     table_html = (df.style.set_table_styles(styles)).render()
-    grid = column(row(p_loss, p_error), row(p_weight_norm, p_gradient_norm))
+    grid = column(row(p_loss, p_error), row(p_weight_norm, p_weights_distances))
     html_norm = file_html(grid, CDN, folder_name)
     with open(folder_name + '/' + folder_name + '.html', 'a') as html_file:
         html_file.write(html_norm)
