@@ -17,7 +17,8 @@ class ParameterServer(object):
         self._workers_num = args.workers_num
 
         # learning rate initialization
-        batch_baseline = 128
+        batch_baseline = args.baseline
+        # TODO maybe dividing by sqrt is wrong
         self._lr = args.lr * np.sqrt(args.batch_size // batch_baseline) / np.sqrt(args.workers_num)
         self._fast_im = args.fast_im
         self._current_lr = args.lr
@@ -31,25 +32,32 @@ class ParameterServer(object):
             alpha = args.workers_num * args.batch_size // batch_baseline
         if args.fast_im is True:
             print('Fast ImageNet Mode')
-            self._lr = self._lr * np.sqrt(args.batch_size // batch_baseline) * np.sqrt(args.workers_num)  # linear scaling
-            start_lr = args.lr / np.sqrt(args.workers_num)
+            # TODO maybe dividing by sqrt is wrong
+            end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / (args.workers_num)
+            start_lr = args.lr / (args.workers_num)
+            self._lr = end_lr
             self._start_lr = start_lr
-            end_lr = args.lr * (args.batch_size // batch_baseline)
             self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
             alpha = 1
         else:
+            self._start_lr = 0
             self._lr_increment_const = 0
         if args.dataset == 'cifar10' or args.dataset == 'cifar100':
-            self._lr_factor = 0.2
+            self._lr_factor = 0.2  # wide resnet
             self._lr_points.append(60 * alpha)
             self._lr_points.append(120 * alpha)
             self._lr_points.append(160 * alpha)
         else:
-            self._lr_factor = 0.2
-            self._lr_points.append(10 * alpha)
-            self._lr_points.append(15 * alpha)
-            self._lr_points.append(20 * alpha)
-            self._lr_points.append(25 * alpha)
+            self._lr_factor = 0.1
+            if args.model == 'alexnet':
+                self._lr_points.append(10 * alpha)
+                self._lr_points.append(15 * alpha)
+                self._lr_points.append(20 * alpha)
+                self._lr_points.append(25 * alpha)
+            else:  # resnet50
+                self._lr_points.append(30 * alpha)
+                self._lr_points.append(60 * alpha)
+                self._lr_points.append(80 * alpha)
 
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
                                           momentum=args.momentum,
@@ -69,7 +77,7 @@ class ParameterServer(object):
     def _set_model_weights(self, weights):
         for name, weight in self._model.named_parameters():
             if torch.cuda.is_available() is True:
-                weight = weights[name].cuda()
+                weight = weights[name].cpu()#cuda()
             else:
                 weight = weights[name]
 
@@ -82,13 +90,14 @@ class ParameterServer(object):
     def _set_model_gradients(self, gradients):
         for name, weight in self._model.named_parameters():
             if torch.cuda.is_available() is True:
-                weight.grad = gradients[name].cuda()
+                weight.grad = gradients[name].cpu()
             else:
                 weight.grad = gradients[name]
 
     def _adjust_learning_rate(self, epoch, iteration):
-        if epoch < 5 and self._fast_im is True:  # learning rate warm up phase
-            lr = self._start_lr + self._lr_increment_const * (iteration + self._iterations_per_epoch*epoch)
+        lr = self._start_lr + self._lr_increment_const * (iteration + self._iterations_per_epoch*epoch)
+        if lr < self._lr and self._fast_im is True:  # learning rate warm up phase
+            print('Warm up Learning Rate - [{}]'.format(lr))
             for param_group in self._optimizer.param_groups:
                 param_group['lr'] = lr
         else:
@@ -104,13 +113,15 @@ class ParameterServer(object):
 
     def _calc_workers_mean(self):
         mu_mean = {}
+        mu_mean_norm = torch.zeros(1)
         keys = self._shards_weights[0].keys()
         for name in keys:
             mu_mean[name] = torch.zeros_like(self._shards_weights[0][name])
             for worker_id in range(0, self._workers_num):
                 mu_mean[name].add_(self._shards_weights[worker_id][name])
             mu_mean[name].mul_(1 / self._workers_num)
-        return mu_mean
+            mu_mean_norm = mu_mean_norm + mu_mean[name].norm() ** 2
+        return mu_mean, torch.sqrt(mu_mean_norm)
 
     def push(self, worker_id, parameters, epoch, **kwargs):
         raise NotImplementedError
@@ -125,14 +136,14 @@ class ParameterServer(object):
         return self._get_model_gradients()
 
     def get_workers_mean_statistics(self):
-        mu_mean = self._calc_workers_mean()
+        mu_mean, mu_mean_norm = self._calc_workers_mean()
         workers_norm_distances_mu = list()
         keys = self._shards_weights[0].keys()
         for worker_id in range(0, self._workers_num):
             norm = torch.zeros(1)
             for name in keys:
                 norm.add_(mu_mean[name].add(self._shards_weights[worker_id][name].mul(-1)).norm() ** 2)
-            workers_norm_distances_mu.append(torch.sqrt(norm))
+            workers_norm_distances_mu.append(torch.sqrt(norm) / mu_mean_norm)
         workers_norm_distances_mu = torch.cat(workers_norm_distances_mu)
         mean_distance = torch.mean(workers_norm_distances_mu)
         min_distance = torch.min(workers_norm_distances_mu)
@@ -141,7 +152,7 @@ class ParameterServer(object):
         return mean_distance, min_distance, max_distance, std_distance
 
     def get_mean_master_dist(self):
-        mu_mean = self._calc_workers_mean()
+        mu_mean, mu_mean_norm = self._calc_workers_mean()
         mu_master = self._get_model_weights()
         norm = torch.zeros(1)
         keys = mu_master.keys()

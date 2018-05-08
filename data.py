@@ -31,13 +31,19 @@ def load_data(args):
 
         root = '/home/ehoffer/Datasets/imagenet/'
 
+        '''if batch size is too big to fit in gpu (resnet 50 case) split the batch 256 chunks'''
+        if args.batch_size > 256 and args.model == 'resnet50':
+            batch_size = 256
+        else:
+            batch_size = args.batch_size
+
         trainset = datasets.ImageFolder(root=root + 'train', transform=transform_train)
-        train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
+        train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                                    shuffle=True, num_workers=16, pin_memory=True)
 
-        testset = datasets.ImageFolder(root=root + 'val_new', transform=transform_test)
-        val_loader = torch.utils.data.DataLoader(testset, batch_size=512,
-                                                 shuffle=False, num_workers=8, pin_memory=True)
+        testset = datasets.ImageFolder(root=root + 'val', transform=transform_test)
+        val_loader = torch.utils.data.DataLoader(testset, batch_size=1024,
+                                                 shuffle=False, num_workers=16, pin_memory=True)
     else:
         print('Loading CIFAR' + str(args.dataset == 'cifar10' and 10 or 100) + ' - ', end='')
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -64,7 +70,7 @@ def load_data(args):
             normalize
         ])
 
-        kwargs = {'num_workers': 4, 'pin_memory': True}
+        kwargs = {'num_workers': 8, 'pin_memory': True}
         assert (args.dataset == 'cifar10' or args.dataset == 'cifar100')
         train_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
@@ -72,6 +78,6 @@ def load_data(args):
             batch_size=args.batch_size, shuffle=True, **kwargs)
         val_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
-            batch_size=512, shuffle=False, **kwargs)
+            batch_size=1024, shuffle=False, **kwargs)
 
     return train_loader, val_loader

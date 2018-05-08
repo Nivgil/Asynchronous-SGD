@@ -27,6 +27,7 @@ class StatImage(object):
         self._sim_num = args.sim_num
         self._iterations_per_epoch = args.iterations_per_epoch
         self._dataset = args.dataset
+        self._model = args.model
 
     def save_loss(self, loss):
         self._loss.append(loss)
@@ -39,16 +40,16 @@ class StatImage(object):
 
     def save_weight_norm(self, weights_dict):
         norm = torch.zeros(1)
-        if self._dataset == 'imagenet':
-            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2
+        if self._model == 'alexnet':
+            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2 #TODO
         else:
             norm = norm + weights_dict['module.fc.weight'].norm() ** 2
         self._weight_norm.append(torch.sqrt(norm).numpy()[0])
 
     def save_gradient_norm(self, weights_dict):
         norm = torch.zeros(1)
-        if self._dataset == 'imagenet':
-            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2
+        if self._model == 'alexnet':
+            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2 #TODO
         else:
             norm = norm + weights_dict['module.fc.weight'].norm() ** 2
         self._gradient_norm.append(torch.sqrt(norm).numpy()[0])

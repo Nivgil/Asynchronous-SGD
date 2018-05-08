@@ -53,15 +53,20 @@ def configuration():
                         help='tau communication for elastic')
     parser.add_argument('--rho', default=2.5, type=int,
                         help='rho value for elastic')
+    parser.add_argument('--baseline', default=128, type=int,
+                        help='batch size baseline')
+    parser.add_argument('--model', default='resnet18', type=str,
+                        help='chosen architecture')
+    parser.add_argument('--notes', default='', type=str,
+                        help='notes for simulation')
     parser.set_defaults(augment=True)
     args = parser.parse_args()
     if args.dataset == 'cifar10' or args.dataset == 'cifar100':
-        # args.iterations_per_epoch = 50000 // args.batch_size
         pass
     else:
-        # args.iterations_per_epoch = 1275776 // args.batch_size
-        args.lr = 0.01
+        if args.model == 'alexnet':
+            args.lr = 0.01
         args.save = 1
-        args.name = 'alexnet'
-    args.notes = ''
+        args.baseline = 256
+    args.name = args.model
     return args
