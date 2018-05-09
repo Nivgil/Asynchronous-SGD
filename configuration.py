@@ -2,7 +2,7 @@ import argparse
 
 
 def configuration():
-    parser = argparse.ArgumentParser(description='PyTorch WideResNet Training')
+    parser = argparse.ArgumentParser(description='PyTorch Training')
     parser.add_argument('--dataset', default='cifar10', type=str,
                         help='dataset (cifar10 [default] or cifar100)')
     parser.add_argument('--epochs', default=200, type=int,
@@ -15,8 +15,8 @@ def configuration():
                         help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--nesterov', default=False, type=bool, help='nesterov momentum')
-    parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
-                        help='weight decay (default: 5e-4)')
+    parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+                        help='weight decay (default: 1e-4)')
     parser.add_argument('--layers', default=28, type=int,
                         help='total number of layers (default: 28)')
     parser.add_argument('--widen-factor', default=2, type=int,
@@ -35,14 +35,16 @@ def configuration():
                         help='number of workers')
     parser.add_argument('--grad_clip', default=1000, type=float,
                         help='gradient clipping threshold')
-    parser.add_argument('--gbn', dest='gbn', action='store_true',
-                        help='whether to use ghost batch normalization (default: False)')
-    parser.add_argument('--pbar', dest='bar', action='store_true',
+    parser.add_argument('--no_pbar', dest='bar', action='store_false',
                         help='show progress bar (default: False)')
-    parser.add_argument('--no_regime', dest='regime', action='store_true',
+    parser.add_argument('--time_p', dest='p_time', action='store_true',
+                        help='show iteration time analysis')
+    parser.add_argument('--no_regime', dest='regime', action='store_false',
                         help='train without regime adaptation')
     parser.add_argument('--fast_im', dest='fast_im', action='store_true',
                         help='1 hour image net training regime')
+    parser.add_argument('--gbn', dest='gbn', action='store_true',
+                        help='ghost batch normalization')
     parser.add_argument('--id', default=2000, type=int,
                         help='simulation number')
     parser.add_argument('--save', default=100, type=int,
@@ -53,15 +55,24 @@ def configuration():
                         help='tau communication for elastic')
     parser.add_argument('--rho', default=2.5, type=int,
                         help='rho value for elastic')
+    parser.add_argument('--baseline', default=128, type=int,
+                        help='batch size baseline')
+    parser.add_argument('--model', default='resnet', type=str,
+                        help='chosen architecture')
+    parser.add_argument('--notes', default='', type=str,
+                        help='notes for simulation')
     parser.set_defaults(augment=True)
     args = parser.parse_args()
-    if args.dataset == 'cifar10' or args.dataset == 'cifar100':
-        # args.iterations_per_epoch = 50000 // args.batch_size
-        pass
-    else:
-        # args.iterations_per_epoch = 1275776 // args.batch_size
-        args.lr = 0.01
+    if args.model == 'wideresenet':
+        args.wd = 5e-4
+    if args.dataset == 'imagenet':
+        if args.model == 'alexnet':
+            args.lr = 0.01
+            args.save = 5
         args.save = 1
-        args.name = 'alexnet'
-    args.notes = ''
+        args.baseline = 256
+    if args.fast_im is True:
+        args.regime = False
+        args.nesterov = True
+    args.name = args.model
     return args
