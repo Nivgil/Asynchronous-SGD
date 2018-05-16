@@ -16,12 +16,19 @@ def load_data(args):
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
 
-        transform_train = transforms.Compose([
-            transforms.Resize(256),
-            transforms.RandomCrop(224),
+        transform_train = transforms.Compose([ # Resnet
+            transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            normalize])
+            normalize
+        ])
+
+        # transform_train = transforms.Compose([ # AlexNet
+        #     transforms.Resize(256),
+        #     transforms.RandomCrop(224),
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.ToTensor(),
+        #     normalize])
 
         transform_test = transforms.Compose([
             transforms.Resize(256),
@@ -43,7 +50,7 @@ def load_data(args):
 
         testset = datasets.ImageFolder(root=root + 'val', transform=transform_test)
         val_loader = torch.utils.data.DataLoader(testset, batch_size=1024,
-                                                 shuffle=False, num_workers=16, pin_memory=True)
+                                                 shuffle=True, num_workers=16, pin_memory=True)
     else:
         print('Loading CIFAR' + str(args.dataset == 'cifar10' and 10 or 100) + ' - ', end='')
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],

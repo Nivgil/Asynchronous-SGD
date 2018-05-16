@@ -58,7 +58,9 @@ def main(args):
             print('=> loaded checkpoint {} (epoch {})'.format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
-
+    # print('current lr points {}'.format(server._lr_points))
+    # server._lr_points[-1] = 80
+    # print('updated lr points {}'.format(server._lr_points))
     cudnn.benchmark = True
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
@@ -119,6 +121,7 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
     # switch to train mode
     model.train()
     t1 = time.time()
+
     for i, (input, target) in enumerate(train_loader):
         data_loading += time.time() - t1
         current_accumulate_num = i % batch_accumulate_num
@@ -137,6 +140,7 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
             model.zero_grad()
         output = model(input_var)
         loss = criterion(output, target_var)
+        loss.div_(batch_accumulate_num)  # instead of normalizing gradients
         loss.backward()
         model_time += time.time() - t4
         if grad_clip < 1000:
@@ -145,8 +149,8 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         train_loss.update(loss.data[0], input.size(0))
         train_error.update(100 - prec1[0], input.size(0))
         if current_accumulate_num == (batch_accumulate_num - 1):
-            if batch_accumulate_num > 1:
-                normalize_gradients(model, batch_accumulate_num)
+            # if batch_accumulate_num > 1:
+            #     normalize_gradients(model, batch_accumulate_num)
             t5 = time.time()
             gradients = get_model_gradients(model)
             tau = (i // batch_accumulate_num - current_worker) / workers_number + 1
@@ -156,9 +160,16 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
             bar.next()
         t1 = time.time()
         if i % 10 == 0 and iteration_print is True:
-            print('\nData Loading {:.3f}\nServer Time {:.3f}\nModel Time {:.3f}'.format(data_loading,
-                                                                                        server_time,
-                                                                                        model_time))
+            print('\nTraining - Epoch: [{0}][{1}/{2}]\t'
+                  'Loss {loss_val:.4f} ({loss_avg:.4f})\t'
+                  'Error {error_val:.3f} ({error_avg:.3f})\t'.format(epoch, i, len(train_loader),
+                                                                     loss_avg=train_loss.avg,
+                                                                     loss_val=loss.data[0],
+                                                                     error_val=(100 - prec1[0]),
+                                                                     error_avg=train_error.avg))
+            # print('\nData Loading {:.3f}\nServer Time {:.3f}\nModel Time {:.3f}'.format(data_loading,
+            #                                                                             server_time,
+            #                                                                             model_time))
 
     return train_loss.avg, train_error.avg
 
@@ -169,7 +180,7 @@ def validate(data_loader, model, criterion, server, statistics, bar):
     server_weights = server.get_server_weights()
     set_model_weights(server_weights, model)
     # switch to evaluate mode
-    model.eval()
+    model.eval() #TODO: debug evaluation
 
     error = AverageMeter()
     error_5 = AverageMeter()

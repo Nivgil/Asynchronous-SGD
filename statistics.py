@@ -179,12 +179,15 @@ class StatImage(object):
         self._visualize_weights_master_distances(handle_master_distance, resolution)
         self._visualize_mean_master_dist(handle_mean_master_dist, legend, color, line_dash, resolution)
 
-    def get_scores(self):
+    def get_scores(self, handle=None):
         error = self._error
+        min_score = np.min(error) * 100
+        if handle is not None:
+            min_index = np.argmin(error) + 1
+            handle.circle(min_index, min_score/100, color='red', size=5, alpha=0.5)
         # use 15% of last epochs
         start_epoch = int(self._epochs * 0.85)
         error = error[start_epoch:]
-        min_score = np.min(error) * 100
         mean_score = np.mean(error) * 100
         if self._dataset == 'imagenet':
             error_top5 = self._error_top5

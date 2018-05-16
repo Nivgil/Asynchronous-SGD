@@ -14,7 +14,7 @@ class ParameterServer(object):
 
     @staticmethod
     def get_lr_reduce_epochs(model):
-        return {'resnet': [30, 60, 90], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160]}[model]
+        return {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160]}[model]
 
     def __init__(self, model, args, **kwargs):
         self._model = deepcopy(model)
@@ -22,7 +22,7 @@ class ParameterServer(object):
 
         # learning rate initialization
         batch_baseline = args.baseline
-        self._lr = args.lr * np.sqrt(args.batch_size // batch_baseline) / np.sqrt(args.workers_num)
+        self._lr = args.lr * np.sqrt(args.batch_size // batch_baseline) / (args.workers_num)
         self._fast_im = args.fast_im
         self._current_lr = args.lr
         self._lr_points = self.get_lr_reduce_epochs(args.model)

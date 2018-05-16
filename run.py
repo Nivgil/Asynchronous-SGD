@@ -8,6 +8,7 @@ import train
 from configuration import configuration
 from email_notification import send_notification
 import warnings
+# import evaluate
 
 
 def main():
@@ -15,14 +16,8 @@ def main():
     base_name = args.name
 
     for idx in range(1, 2):
-        # args.id = 1000
         args.sim_num = idx * 10
-        # args.batch_size = 128
-        # args.workers_num = 1
-        # args.epochs = 200
         args.name = base_name + '_{}'.format(args.sim_num)
-        # args.gbn = 0
-        # args.notes = 'baseline'
         min_error, mean_error = exec_unit(args)
         message = 'Simulation Number {0} Completed\nMin Error - {1:.3f}\nMean Error - {2:.3f}'.format(args.sim_num,
                                                                                                       min_error,
@@ -44,6 +39,7 @@ def exec_unit(args=None):
         raise Exception('Log file already exists')
 
     stats_train, stats_test = train.main(args)
+    # stats_train, stats_test = evaluate.main(args)
 
     with open(folder_name + '/' + args.name, 'wb') as pickle_out:
         pickle.dump((stats_test, stats_train), pickle_out)
