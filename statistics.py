@@ -49,10 +49,10 @@ class StatImage(object):
     def save_gradient_norm(self, weights_dict):
         norm = torch.zeros(1)
         if self._model == 'alexnet':
-            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2 #TODO
+            norm = weights_dict['module.classifier.0.weight'].norm()
         else:
-            norm = norm + weights_dict['module.fc.weight'].norm() ** 2
-        self._gradient_norm.append(torch.sqrt(norm).numpy()[0])
+            norm = weights_dict['module.fc.weight'].norm()
+        self._gradient_norm.append(norm.data.cpu().numpy()[0])
 
     def save_weight_mean_dist(self, distance):
         self._weights_mean_distance_stats.append(distance)
