@@ -14,7 +14,8 @@ class ParameterServer(object):
 
     @staticmethod
     def get_lr_reduce_epochs(model):
-        return {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160]}[model]
+        return {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160],
+                'simplenet': [60, 120, 160]}[model]
 
     def __init__(self, model, args, **kwargs):
         self._model = deepcopy(model)
