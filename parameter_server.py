@@ -227,38 +227,6 @@ class EAMSGD(ParameterServer):
         for name, val in self._model.named_parameters():
             self._optimizer.state[val]['momentum_buffer'] = self._shards_velocity[worker_id][name]
 
-#
-# def training_regime(regime, lr, batch_size, workers_num, dataset):
-#     batch_baseline = 128
-#     if regime == 'standard' or regime == 'regime_adaptation':
-#         lr = lr * np.sqrt(batch_size // batch_baseline) / np.sqrt(workers_num)
-#         lr_points = list()
-#         if regime == 'standard':
-#             print('No Regime Adaptation')
-#             alpha = 1
-#         else:
-#             print('Regime Adaptation')
-#             alpha = workers_num * batch_size // batch_baseline
-#         if dataset == 'cifar10' or dataset == 'cifar100':
-#             lr_factor = 0.2
-#             lr_points.append(60 * alpha)
-#             lr_points.append(120 * alpha)
-#             lr_points.append(160 * alpha)
-#         else:  # imagenet
-#             lr_factor = 0.2
-#             lr_points.append(10 * alpha)
-#             lr_points.append(15 * alpha)
-#             lr_points.append(20 * alpha)
-#             lr_points.append(25 * alpha)
-#     if regime == '1_hour_imagenet':
-#         start_lr = lr / np.sqrt(workers_num)
-#         end_lr = lr * (batch_size // batch_baseline) / np.sqrt(workers_num)
-#         lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
-#         lr_points = list()
-#         print('Regime Adaptation')
-#         alpha = 1  # workers_num * batch_size // batch_baseline
-#         lr_factor = 0.2
-#         lr_points.append(10 * alpha)
-#         lr_points.append(15 * alpha)
-#         lr_points.append(20 * alpha)
-#         lr_points.append(25 * alpha)
+
+def _get_norm(parameters):
+    return parameters['module.fc.weight'].norm().data.cpu().numpy()[0]

@@ -77,7 +77,7 @@ def main(args):
     for epoch in range(args.start_epoch, args.epochs):
         # train for one epoch
         train_loss, train_error = train(train_loader, model, criterion, server, epoch, args.workers_num, args.grad_clip,
-                                        batch_accumulate_num, train_bar, args.p_time)
+                                        batch_accumulate_num, train_bar, args.p_time, train_statistics)
 
         train_time = time.time() - train_time
         if args.bar is True:
@@ -93,7 +93,7 @@ def main(args):
         train_statistics.save_weight_master_dist(server.get_workers_master_statistics())
         train_statistics.save_mean_master_dist(server.get_mean_master_dist())
         train_statistics.save_weight_norm(server.get_server_weights())
-        train_statistics.save_gradient_norm(server.get_server_gradients())
+        # train_statistics.save_gradient_norm(server.get_server_gradients())
         val_time = time.time() - val_time
         if args.bar is True:
             val_bar.finish()
@@ -113,7 +113,7 @@ def main(args):
 
 
 def train(train_loader, model, criterion, server, epoch, workers_number, grad_clip, batch_accumulate_num, bar,
-          iteration_print):
+          iteration_print, statistics):
     """Train for one epoch on the training set"""
     train_error = AverageMeter()
     train_loss = AverageMeter()
@@ -149,10 +149,9 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         train_loss.update(loss.data[0], input.size(0))
         train_error.update(100 - prec1[0], input.size(0))
         if current_accumulate_num == (batch_accumulate_num - 1):
-            # if batch_accumulate_num > 1:
-            #     normalize_gradients(model, batch_accumulate_num)
             t5 = time.time()
             gradients = get_model_gradients(model)
+            statistics.save_gradient_norm(gradients)  # TODO gradient norm by iteration
             tau = (i // batch_accumulate_num - current_worker) / workers_number + 1
             server.push(current_worker, gradients, epoch, tau=tau, iteration=(i // batch_accumulate_num))
             server_time += time.time() - t5
