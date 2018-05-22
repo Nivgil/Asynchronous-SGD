@@ -50,6 +50,8 @@ class StatImage(object):
         norm = torch.zeros(1)
         if self._model == 'alexnet':
             norm = weights_dict['module.classifier.0.weight'].norm()
+        elif self._model == 'simplenet':
+            norm = weights_dict['module.fc3'].norm()
         else:
             norm = weights_dict['module.fc.weight'].norm()
         self._gradient_norm.append(norm.data.cpu().numpy()[0])
