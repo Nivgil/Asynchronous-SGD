@@ -41,17 +41,19 @@ class StatImage(object):
     def save_weight_norm(self, weights_dict):
         norm = torch.zeros(1)
         if self._model == 'alexnet':
-            norm = norm + weights_dict['module.classifier.0.weight'].norm() ** 2 #TODO
+            norm = weights_dict['module.classifier.0.weight'].norm()  #TODO
+        elif self._model == 'simplenet':
+            norm = weights_dict['module.fc3.weight'].norm()
         else:
-            norm = norm + weights_dict['module.fc.weight'].norm() ** 2
-        self._weight_norm.append(torch.sqrt(norm).numpy()[0])
+            norm = weights_dict['module.fc.weight'].norm()
+        self._weight_norm.append(norm.numpy()[0])
 
     def save_gradient_norm(self, weights_dict):
         norm = torch.zeros(1)
         if self._model == 'alexnet':
             norm = weights_dict['module.classifier.0.weight'].norm()
         elif self._model == 'simplenet':
-            norm = weights_dict['module.fc3'].norm()
+            norm = weights_dict['module.fc3.weight'].norm()
         else:
             norm = weights_dict['module.fc.weight'].norm()
         self._gradient_norm.append(norm.data.cpu().numpy()[0])
