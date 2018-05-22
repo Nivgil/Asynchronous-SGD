@@ -39,14 +39,13 @@ class StatImage(object):
         self._error_top5.append(error / 100)
 
     def save_weight_norm(self, weights_dict):
-        norm = torch.zeros(1)
         if self._model == 'alexnet':
             norm = weights_dict['module.classifier.0.weight'].norm()  #TODO
         elif self._model == 'simplenet':
             norm = weights_dict['module.fc3.weight'].norm()
         else:
             norm = weights_dict['module.fc.weight'].norm()
-        self._weight_norm.append(norm.numpy()[0])
+        self._weight_norm.append(norm)
 
     def save_gradient_norm(self, weights_dict):
         norm = torch.zeros(1)
