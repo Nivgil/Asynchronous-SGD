@@ -22,7 +22,7 @@ class ParameterServer(object):
 
         # learning rate initialization
         batch_baseline = args.baseline
-        self._lr = args.lr * np.sqrt(args.batch_size // batch_baseline) / (args.workers_num)
+        self._lr = args.lr * np.sqrt((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
         self._fast_im = args.fast_im
         self._current_lr = args.lr
         self._lr_points = self.get_lr_reduce_epochs(args.model)
@@ -34,7 +34,7 @@ class ParameterServer(object):
             self._lr_points = [x * alpha for x in self._lr_points]
             print('Regime Adaptation - LR Reduce at {}'.format(self._lr_points))
         if args.fast_im is True:
-            end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / (args.workers_num)
+            end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
             start_lr = args.lr / (args.workers_num)
             self._lr = end_lr
             self._start_lr = start_lr
