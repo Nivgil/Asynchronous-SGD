@@ -46,7 +46,6 @@ class StatImage(object):
         self._weight_norm.append(norm)
 
     def save_gradient_norm(self, weights_dict):
-        norm = torch.zeros(1)
         if self._model == 'alexnet':
             norm = weights_dict['module.classifier.0.weight'].norm()
         else:

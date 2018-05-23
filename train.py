@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -16,6 +17,7 @@ from statistics import Statistics
 def main(args):
     time_stamp = '{:.0f}'.format(time.time() % 100000)
     if torch.cuda.is_available() is True:
+        logging.info('Utilizing GPU', extra=args.client)
         print('Utilizing GPU')
 
     train_loader, val_loader = load_data(args)
@@ -37,8 +39,9 @@ def main(args):
         val_len = len(val_loader.dataset.test_labels) // 1024
 
     # get the number of model parameters
-    print('Number of model parameters: {}'.format(
-        sum([p.data.nelement() for p in model.parameters()])))
+    log_str = 'Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()]))
+    logging.info(log_str, extra=args.client)
+    print(log_str)
     # for training on multiple GPUs.
     model = torch.nn.DataParallel(model)
     model = model.cuda()
@@ -70,14 +73,15 @@ def main(args):
     else:
         train_bar = None
         val_bar = None
-
-    print(
-        '{}: Training neural network for {} epochs with {} workers'.format(args.sim_num, args.epochs, args.workers_num))
+    log_str = '{}: Training neural network for {} epochs with {} workers'.format(args.sim_num, args.epochs,
+                                                                                 args.workers_num)
+    logging.info(log_str, extra=args.client)
+    print(log_str)
     train_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
         # train for one epoch
         train_loss, train_error = train(train_loader, model, criterion, server, epoch, args.workers_num, args.grad_clip,
-                                        batch_accumulate_num, train_bar, args.p_time, train_statistics)
+                                        batch_accumulate_num, train_bar, args.p_time, train_statistics, args.client)
 
         train_time = time.time() - train_time
         if args.bar is True:
@@ -98,9 +102,13 @@ def main(args):
         if args.bar is True:
             val_bar.finish()
             val_bar.index = 0
-        print('Epoch [{0:1d}]: Train: Time [{1:.2f}], Loss [{2:.3f}], Error[{3:.3f}] |'
-              ' Test: Time [{4:.2f}], Loss [{5:.3f}], Error[{6:.3f}]'
-              .format(epoch, train_time, train_loss, train_error, val_time, val_loss, val_error))
+
+        log_str = 'Epoch [{0:1d}]: Train: Time [{1:.2f}], Loss [{2:.3f}], Error[{3:.3f}] | ' \
+                  'Test: Time [{4:.2f}], Loss [{5:.3f}], Error[{6:.3f}]'.format(epoch, train_time, train_loss,
+                                                                                train_error, val_time, val_loss,
+                                                                                val_error)
+        logging.info(log_str, extra=args.client)
+        print(log_str)
         if epoch % args.save == 0:
             save_checkpoint({'epoch': epoch + 1,
                              'state_dict': model.state_dict(),
@@ -113,7 +121,7 @@ def main(args):
 
 
 def train(train_loader, model, criterion, server, epoch, workers_number, grad_clip, batch_accumulate_num, bar,
-          iteration_print, statistics):
+          iteration_print, statistics, client):
     """Train for one epoch on the training set"""
     train_error = AverageMeter()
     train_loss = AverageMeter()
@@ -159,17 +167,15 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
             bar.next()
         t1 = time.time()
         if i % 10 == 0 and iteration_print is True:
-            print('\nTraining - Epoch: [{0}][{1}/{2}]\t'
-                  'Loss {loss_val:.4f} ({loss_avg:.4f})\t'
-                  'Error {error_val:.3f} ({error_avg:.3f})\t'.format(epoch, i, len(train_loader),
-                                                                     loss_avg=train_loss.avg,
-                                                                     loss_val=loss.data[0],
-                                                                     error_val=(100 - prec1[0]),
-                                                                     error_avg=train_error.avg))
-            # print('\nData Loading {:.3f}\nServer Time {:.3f}\nModel Time {:.3f}'.format(data_loading,
-            #                                                                             server_time,
-            #                                                                             model_time))
-
+            log_str = '\nTraining - Epoch: [{0}][{1}/{2}]\t' \
+                      'Loss {loss_val:.4f} ({loss_avg:.4f})\t' \
+                      'Error {error_val:.3f} ({error_avg:.3f})\t'.format(epoch, i, len(train_loader),
+                                                                         loss_avg=train_loss.avg,
+                                                                         loss_val=loss.data[0],
+                                                                         error_val=(100 - prec1[0]),
+                                                                         error_avg=train_error.avg)
+            logging.info(log_str, extra=client)
+            print(log_str)
     return train_loss.avg, train_error.avg
 
 
@@ -179,7 +185,7 @@ def validate(data_loader, model, criterion, server, statistics, bar):
     server_weights = server.get_server_weights()
     set_model_weights(server_weights, model)
     # switch to evaluate mode
-    model.eval() #TODO: debug evaluation
+    model.eval()  # TODO: debug evaluation
 
     error = AverageMeter()
     error_5 = AverageMeter()

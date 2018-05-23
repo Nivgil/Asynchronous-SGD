@@ -7,8 +7,10 @@ import random
 import train
 from configuration import configuration
 from email_notification import send_notification
+from graphs import create_graphs
 import warnings
-# import evaluate
+import logging
+import socket
 
 
 def main():
@@ -17,12 +19,14 @@ def main():
 
     for idx in range(1, 2):
         args.sim_num = idx * 10
-        args.name = base_name + '_{}'.format(args.sim_num)
+        args.name = base_name + '_{}'.format(args.id)
         min_error, mean_error = exec_unit(args)
-        message = 'Simulation Number {0} Completed\nMin Error - {1:.3f}\nMean Error - {2:.3f}'.format(args.sim_num,
+        graph_path = create_graphs(sim_num=args.id, linear=True)
+
+        message = 'Simulation Number {0} Completed\nMin Error - {1:.3f}\nMean Error - {2:.3f}'.format(args.id,
                                                                                                       min_error,
                                                                                                       mean_error)
-        send_notification(message, vars(args))
+        send_notification(message, vars(args), graph_path, args)
 
 
 def exec_unit(args=None):
@@ -34,16 +38,21 @@ def exec_unit(args=None):
     path_name = os.path.join(CONFIGURATIONS_DIR, folder_name)
     if not os.path.exists(path_name):
         os.mkdir(path_name)
-    log_name = os.path.join(path_name, args.name + '.log')
-    if os.path.exists(log_name):
+    param_log_name = os.path.join(path_name, args.name + '_param.log')
+    if os.path.exists(param_log_name):
         raise Exception('Log file already exists')
-
+    args.client = {'clientname': socket.gethostname()}
+    FORMAT = '%(asctime)-15s %(clientname)s %(message)s'
+    log_name = os.path.join(path_name, args.name) + '.log'
+    logging.basicConfig(filename=log_name, level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %I:%M:%S %p')
     stats_train, stats_test = train.main(args)
     # stats_train, stats_test = evaluate.main(args)
-
+    args.client = args.client['clientname']
+    if logging.root:
+        del logging.root.handlers[:]
     with open(folder_name + '/' + args.name, 'wb') as pickle_out:
         pickle.dump((stats_test, stats_train), pickle_out)
-    with open(log_name, 'w') as log_file:
+    with open(param_log_name, 'w') as log_file:
         log_file.write(json.dumps(vars(args)))
     return stats_test.get_scores()
 
