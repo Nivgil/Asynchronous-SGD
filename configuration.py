@@ -63,7 +63,7 @@ def configuration():
                         help='notes for simulation')
     parser.set_defaults(augment=True)
     args = parser.parse_args()
-    if args.model == 'wideresenet':
+    if args.model == 'wideresnet':
         args.wd = 5e-4
     if args.dataset == 'imagenet':
         if args.model == 'alexnet':
