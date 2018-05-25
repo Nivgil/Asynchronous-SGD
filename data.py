@@ -10,25 +10,18 @@ from PIL import ImageFile
 
 
 def load_data(args):
-    if args.dataset == 'imagenet':
+    if args.dataset == 'image_net':
         print('Loading ImageNet - ', end='')
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
 
-        transform_train = transforms.Compose([ # Resnet
-            transforms.RandomResizedCrop(224),
+        transform_train = transforms.Compose([
+            transforms.Resize(256),
+            transforms.RandomCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            normalize
-        ])
-
-        # transform_train = transforms.Compose([ # AlexNet
-        #     transforms.Resize(256),
-        #     transforms.RandomCrop(224),
-        #     transforms.RandomHorizontalFlip(),
-        #     transforms.ToTensor(),
-        #     normalize])
+            normalize])
 
         transform_test = transforms.Compose([
             transforms.Resize(256),
@@ -38,18 +31,12 @@ def load_data(args):
 
         root = '/home/ehoffer/Datasets/imagenet/'
 
-        '''if batch size is too big to fit in gpu (resnet case) split the batch 256 chunks'''
-        if args.batch_size > 256 and args.model == 'resnet':
-            batch_size = 256
-        else:
-            batch_size = args.batch_size
-
         trainset = datasets.ImageFolder(root=root + 'train', transform=transform_train)
-        train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
+        train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
                                                    shuffle=True, num_workers=16, pin_memory=True)
 
         testset = datasets.ImageFolder(root=root + 'val', transform=transform_test)
-        val_loader = torch.utils.data.DataLoader(testset, batch_size=1024,
+        val_loader = torch.utils.data.DataLoader(testset, batch_size=1280,
                                                  shuffle=True, num_workers=16, pin_memory=True)
     else:
         print('Loading CIFAR' + str(args.dataset == 'cifar10' and 10 or 100) + ' - ', end='')
@@ -77,7 +64,7 @@ def load_data(args):
             normalize
         ])
 
-        kwargs = {'num_workers': 8, 'pin_memory': True}
+        kwargs = {'num_workers': 4, 'pin_memory': True}
         assert (args.dataset == 'cifar10' or args.dataset == 'cifar100')
         train_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
@@ -85,6 +72,6 @@ def load_data(args):
             batch_size=args.batch_size, shuffle=True, **kwargs)
         val_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
-            batch_size=1024, shuffle=False, **kwargs)
+            batch_size=1280, shuffle=True, **kwargs)
 
     return train_loader, val_loader
