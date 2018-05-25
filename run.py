@@ -47,7 +47,7 @@ def exec_unit(args=None):
     logging.basicConfig(filename=log_name, level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %I:%M:%S %p')
     configuration_str = ''
     for arg in vars(args):
-        params_str = configuration_str + arg + str(getattr(args, arg)) + '\n'
+        configuration_str = configuration_str + arg + str(getattr(args, arg)) + '\n'
     print(configuration_str)
     logging.info(configuration_str, extra=args.client)
     stats_train, stats_test = train.main(args)
