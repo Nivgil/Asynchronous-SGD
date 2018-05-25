@@ -45,8 +45,6 @@ def exec_unit(args=None):
     FORMAT = '%(asctime)-15s %(clientname)s %(message)s'
     log_name = os.path.join(path_name, args.name) + '.log'
     logging.basicConfig(filename=log_name, level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %I:%M:%S %p')
-    for param in args:
-        print(param)
     stats_train, stats_test = train.main(args)
     # stats_train, stats_test = evaluate.main(args)
     args.client = args.client['clientname']

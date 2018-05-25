@@ -75,4 +75,6 @@ def configuration():
         args.regime = False
         args.nesterov = True
     args.name = args.model
+    for arg in vars(args):
+        print(arg, getattr(args, arg))
     return args
