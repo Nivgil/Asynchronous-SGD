@@ -63,6 +63,7 @@ def configuration():
                         help='notes for simulation')
     parser.set_defaults(augment=True)
     args = parser.parse_args()
+    import ipdb; ipdb.set_trace()
     if args.model == 'wideresnet':
         args.wd = 5e-4
     if args.dataset == 'imagenet':
