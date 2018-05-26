@@ -11,6 +11,7 @@ from graphs import create_graphs
 import warnings
 import logging
 import socket
+from datetime import datetime
 
 
 def main():
@@ -20,12 +21,14 @@ def main():
     for idx in range(1, 2):
         args.sim_num = idx * 10
         args.name = base_name + '_{}'.format(args.id)
+        time = str(datetime.now())
         min_error, mean_error = exec_unit(args)
         graph_path = create_graphs(sim_num=args.id, linear=True)
 
-        message = 'Simulation Number {0} Completed\nMin Error - {1:.3f}\nMean Error - {2:.3f}'.format(args.id,
-                                                                                                      min_error,
-                                                                                                      mean_error)
+        message = '{0}\nSimulation Number {1} Completed\nMin Error - {2:.3f}\nMean Error - {3:.3f}'.format(time,
+                                                                                                           args.id,
+                                                                                                           min_error,
+                                                                                                           mean_error)
         send_notification(message, vars(args), graph_path, args)
 
 
@@ -47,7 +50,7 @@ def exec_unit(args=None):
     logging.basicConfig(filename=log_name, level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %I:%M:%S %p')
     configuration_str = ''
     for arg in vars(args):
-        configuration_str = configuration_str + arg + str(getattr(args, arg)) + '\n'
+        configuration_str = configuration_str + arg + ' ' + str(getattr(args, arg)) + '\n'
     print(configuration_str)
     logging.info(configuration_str, extra=args.client)
     stats_train, stats_test = train.main(args)

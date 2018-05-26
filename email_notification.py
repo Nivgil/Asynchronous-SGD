@@ -10,7 +10,7 @@ def send_notification(msg_text_1, msg_text_2, graph_path, args):
     msg = MIMEMultipart()
     msg['From'] = fromaddr
     msg['To'] = toaddr
-    msg['Subject'] = args.client + " - Code Notification"
+    msg['Subject'] = args.client + " - Code Notification ({})".format(args.id)
 
     body = msg_text_1 + '\n\n\n'
     msg.attach(MIMEText(body, 'plain'))

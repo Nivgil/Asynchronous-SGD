@@ -61,9 +61,6 @@ def main(args):
             print('=> loaded checkpoint {} (epoch {})'.format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
-    # print('current lr points {}'.format(server._lr_points))
-    # server._lr_points[-1] = 80
-    # print('updated lr points {}'.format(server._lr_points))
     cudnn.benchmark = True
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
@@ -129,7 +126,6 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
     # switch to train mode
     model.train()
     t1 = time.time()
-
     for i, (input, target) in enumerate(train_loader):
         data_loading += time.time() - t1
         current_accumulate_num = i % batch_accumulate_num
