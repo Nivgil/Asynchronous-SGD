@@ -28,6 +28,7 @@ class ParameterServer(object):
         self._lr_points = self.get_lr_reduce_epochs(args.model)
         self._lr_factor = 0.2 if args.model == 'wideresnet' else 0.1
         self._iterations_per_epoch = args.iterations_per_epoch
+        self._momentum = args.momentum
 
         if args.regime is True:
             alpha = args.workers_num * args.batch_size // batch_baseline
@@ -94,6 +95,12 @@ class ParameterServer(object):
                 self._current_lr = lr
                 for param_group in self._optimizer.param_groups:
                     param_group['lr'] = lr
+        if epoch == 30 and self._fast_im is True:
+            if self._momentum == 0:
+                print('Turning Momentum On')
+                self._momentum = 0.9
+                for param_group in self._optimizer.param_groups:
+                    param_group['momentum'] = 0.9
         return lr
 
     def _calc_workers_mean(self):

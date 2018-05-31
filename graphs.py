@@ -99,10 +99,11 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
                                color=colors[idx % 10],
                                line_dash='solid',
                                resolution=resolution)
-        min_score_test, mean_score_test = stats_test.get_scores(p_error)
+        min_score_test, mean_score_test, last_score_test = stats_test.get_scores(p_error)
         with open(folder_name + '/' + file + '_' + 'results.txt', 'w') as results_out:
             results_out.write('minimum error: {0:.3f}%'.format(min_score_test) + '\n')
-            results_out.write('mean error: {0:.3f}%'.format(mean_score_test))
+            results_out.write('mean error: {0:.3f}%'.format(mean_score_test) + '\n')
+            results_out.write('last error: {0:.3f}%'.format(last_score_test) + '\n')
     p_loss.legend.click_policy = "hide"
     p_loss.legend.location = 'bottom_left'
     p_error.legend.click_policy = "hide"

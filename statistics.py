@@ -187,13 +187,14 @@ class StatImage(object):
         start_epoch = int(self._epochs * 0.85)
         error = error[start_epoch:]
         mean_score = np.mean(error) * 100
+        last_score = error[-1] * 100
         if self._dataset == 'imagenet':
             error_top5 = self._error_top5
             error_top5 = error_top5[start_epoch:]
             min_score_top5 = min(error_top5) * 100
             mean_score_top5 = np.mean(error_top5) * 100
             # return min_score, mean_score, min_score_top5, mean_score_top5
-        return min_score, mean_score
+        return min_score, mean_score, last_score
 
     def generic_future(self):
         pass

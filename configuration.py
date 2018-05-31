@@ -73,6 +73,6 @@ def configuration():
         args.baseline = 256
     if args.fast_im is True:
         args.regime = False
-        args.nesterov = True
+        # args.nesterov = True
     args.name = args.model
     return args

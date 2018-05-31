@@ -47,7 +47,7 @@ def exec_unit(args=None):
     args.client = {'clientname': socket.gethostname()}
     FORMAT = '%(asctime)-15s %(clientname)s %(message)s'
     log_name = os.path.join(path_name, args.name) + '.log'
-    logging.basicConfig(filename=log_name, level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %I:%M:%S %p')
+    logging.basicConfig(filename=log_name, level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %I:%M:%S %p')
     configuration_str = ''
     for arg in vars(args):
         configuration_str = configuration_str + arg + ' ' + str(getattr(args, arg)) + '\n'
