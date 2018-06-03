@@ -150,15 +150,15 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         if grad_clip < 1000:
             torch.nn.utils.clip_grad_norm(model.parameters(), grad_clip)
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
-        train_loss.update(loss.data[0], input.size(0))
+        train_loss.update(loss.data[0] * batch_accumulate_num, input.size(0))
         train_error.update(100 - prec1[0], input.size(0))
         if current_accumulate_num == (batch_accumulate_num - 1):
             t5 = time.time()
             gradients = get_model_gradients(model)
-            # statistics.save_gradient_norm(gradients)  # TODO gradient norm by iteration
             tau = (i // batch_accumulate_num - current_worker) / workers_number + 1
-            server.push(current_worker, gradients, epoch, tau=tau, iteration=(i // batch_accumulate_num))
+            step_norm = server.push(current_worker, gradients, epoch, tau=tau, iteration=(i // batch_accumulate_num))
             server_time += time.time() - t5
+            statistics.save_step_norm(step_norm)
         if bar is not None:
             bar.next()
         t1 = time.time()

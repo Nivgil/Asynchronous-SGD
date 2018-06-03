@@ -17,6 +17,7 @@ class StatImage(object):
         self._error_top5 = []
         self._weight_norm = []
         self._gradient_norm = []
+        self._step_norm = []
         self._snr_1_hist = []
         self._snr_2_hist = []
         self._weights_mean_distance_stats = []
@@ -51,6 +52,9 @@ class StatImage(object):
         else:
             norm = weights_dict['module.fc.weight'].norm()
         self._gradient_norm.append(norm.data.cpu().numpy()[0])
+
+    def save_step_norm(self, step_norm):
+        self._step_norm.append(step_norm)
 
     def save_weight_mean_dist(self, distance):
         self._weights_mean_distance_stats.append(distance)

@@ -116,6 +116,12 @@ class ParameterServer(object):
             mu_mean_norm = mu_mean_norm + mu_mean[name].norm() ** 2
         return mu_mean, torch.sqrt(mu_mean_norm)
 
+    def _step_norm(self, parameters):
+        norm = torch.zeros(0)
+        for name, weight in self._model.named_parameters():
+            norm += norm + torch.abs(weight.data.add(parameters[name].mul(-1)))
+        return norm
+
     def push(self, worker_id, parameters, epoch, **kwargs):
         raise NotImplementedError
 
@@ -185,11 +191,13 @@ class ASGD(ParameterServer):
         super().__init__(*args, **kwargs)
 
     def push(self, worker_id, parameters, epoch, **kwargs):
+        step_norm = self._step_norm(parameters)
         self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
         self._set_model_gradients(parameters)
         self._optimizer.step()
         self._shards_weights[worker_id] = self._get_model_weights()
+        return step_norm
 
     def pull(self, worker_id):
         return self._shards_weights[worker_id]
