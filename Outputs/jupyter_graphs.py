@@ -95,7 +95,7 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
                                color=colors[idx % 10],
                                line_dash='solid',
                                resolution=resolution)
-        min_score_test, mean_score_test = stats_test.get_scores(p_error)
+        scores = stats_test.get_scores(p_error)
         param_logging = dict_to_table(params_dict)
     p_loss.legend.click_policy = "hide"
     p_loss.legend.location = 'bottom_left'
@@ -107,7 +107,7 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
     p_gradient_norm.legend.location = "bottom_left"
 
     return [p_loss, p_error, p_weight_norm, p_gradient_norm, p_weights_mean_distances, p_weights_master_distances,
-            p_mean_master_dist], min_score_test, mean_score_test, param_logging
+            p_mean_master_dist], scores, param_logging
 
 
 def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
