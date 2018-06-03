@@ -47,6 +47,7 @@ class ParameterServer(object):
 
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
                                           momentum=args.momentum,
+                                          dampening=args.dampening,
                                           nesterov=args.nesterov,
                                           weight_decay=args.weight_decay)
         self._shards_weights = list()

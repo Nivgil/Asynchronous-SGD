@@ -14,6 +14,7 @@ def configuration():
     parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                         help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
+    parser.add_argument('--dampening', default=0, type=float, help='dampening')
     parser.add_argument('--nesterov', dest='nesterov', action='store_true', help='nesterov momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
                         help='weight decay (default: 1e-4)')
