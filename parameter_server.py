@@ -119,9 +119,8 @@ class ParameterServer(object):
     def _step_norm(self, parameters):
         norm = 0
         for name, weight in self._model.named_parameters():
-            import ipdb; ipdb.set_trace()
             norm += norm + (weight.data.add(parameters[name].data.mul(-1))).norm() ** 2
-        return torch.sqrt(norm)
+        return sqrt(norm)
 
     def push(self, worker_id, parameters, epoch, **kwargs):
         raise NotImplementedError
