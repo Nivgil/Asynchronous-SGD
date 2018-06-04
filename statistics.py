@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from math import sqrt
 
 
 class Statistics(object):
@@ -41,7 +42,7 @@ class StatImage(object):
 
     def save_weight_norm(self, weights_dict):
         if self._model == 'alexnet':
-            norm = weights_dict['module.classifier.0.weight'].norm()  #TODO
+            norm = weights_dict['module.classifier.0.weight'].norm()  # TODO
         else:
             norm = weights_dict['module.fc.weight'].norm()
         self._weight_norm.append(norm)
@@ -85,6 +86,8 @@ class StatImage(object):
         else:
             t = np.arange(self._iterations_per_epoch, (self._epochs + 1) * self._iterations_per_epoch,
                           self._iterations_per_epoch)
+        if self._log.batch_size == 8192:
+            norm = [x * sqrt(32) for x in norm]
         handle.line(t, norm, line_width=3, line_dash='solid', legend=legend, line_color=color)
 
     def _visualize_loss(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
@@ -101,15 +104,20 @@ class StatImage(object):
     def _visualize_error(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        # error = [e.cpu().numpy() for e in self._error]
         error = self._error
-        # error = self._error
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
             t = np.arange(self._iterations_per_epoch, (self._epochs + 1) * self._iterations_per_epoch,
                           self._iterations_per_epoch)
         handle.line(t, error, line_width=3, line_dash=line_dash, legend=legend, line_color=color)
+
+    def _visualize_step_norm(self, handle=None, legend=None, color=None, line_dash=None):
+        if handle is None or len(self._step_norm) == 0:
+            return
+        step_norm = self._step_norm
+        t = range(1, len(step_norm) + 1)
+        handle.line(t, step_norm, line_width=3, line_dash=line_dash, legend=legend, line_color=color)
 
     def _visualize_mean_master_dist(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
@@ -172,7 +180,7 @@ class StatImage(object):
 
     def export_data(self, handle_loss=None, handle_error=None, handle_gradient_norm=None, handle_weight_norm=None,
                     handle_mean_distance=None, handle_master_distance=None, legend=None, color=None, line_dash=None,
-                    handle_mean_master_dist=None, resolution=None):
+                    handle_mean_master_dist=None, handle_step_norm=None, resolution=None):
         self._visualize_loss(handle_loss, legend, color, line_dash, resolution)
         self._visualize_error(handle_error, legend, color, line_dash, resolution)
         self._visualize_weight_norm(handle_weight_norm, legend, color, resolution)
@@ -180,13 +188,14 @@ class StatImage(object):
         self._visualize_weights_mean_distances(handle_mean_distance, resolution)
         self._visualize_weights_master_distances(handle_master_distance, resolution)
         self._visualize_mean_master_dist(handle_mean_master_dist, legend, color, line_dash, resolution)
+        self._visualize_step_norm(handle_step_norm, legend, color, line_dash)
 
     def get_scores(self, handle=None):
         error = self._error
         min_score = np.min(error) * 100
         if handle is not None:
             min_index = np.argmin(error) + 1
-            handle.circle(min_index, min_score/100, color='red', size=5, alpha=0.5)
+            handle.circle(min_index, min_score / 100, color='red', size=5, alpha=0.5)
         # use 15% of last epochs
         start_epoch = int(self._epochs * 0.85)
         error = error[start_epoch:]
