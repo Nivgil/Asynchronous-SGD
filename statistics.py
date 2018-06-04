@@ -51,8 +51,7 @@ class StatImage(object):
             norm = weights_dict['module.classifier.0.weight'].norm()
         else:
             norm = weights_dict['module.fc.weight'].norm()
-        import ipdb; ipdb.set_trace()
-        self._gradient_norm.append(norm.data.cpu().numpy()[0])
+        self._gradient_norm.append(norm)
 
     def save_step_norm(self, step_norm):
         self._step_norm.append(step_norm)
