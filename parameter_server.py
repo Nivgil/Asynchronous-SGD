@@ -119,6 +119,7 @@ class ParameterServer(object):
     def _step_norm(self, parameters):
         norm = 0
         for name, weight in self._model.named_parameters():
+            import ipdb; ipdb.set_trace()
             norm += norm + torch.abs(weight.data.add(parameters[name].data.mul(-1)))
         return norm
 
