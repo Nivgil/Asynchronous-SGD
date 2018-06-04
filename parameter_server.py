@@ -120,8 +120,8 @@ class ParameterServer(object):
         norm = 0
         for name, weight in self._model.named_parameters():
             import ipdb; ipdb.set_trace()
-            norm += norm + torch.abs(weight.data.add(parameters[name].data.mul(-1)))
-        return norm
+            norm += norm + (weight.data.add(parameters[name].data.mul(-1))).norm() ** 2
+        return torch.sqrt(norm)
 
     def push(self, worker_id, parameters, epoch, **kwargs):
         raise NotImplementedError
