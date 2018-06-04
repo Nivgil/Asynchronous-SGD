@@ -119,7 +119,7 @@ class ParameterServer(object):
     def _step_norm(self, parameters):
         norm = torch.zeros(0)
         for name, weight in self._model.named_parameters():
-            norm += norm + torch.abs(weight.data.add(parameters[name].mul(-1)))
+            norm += norm + torch.abs(weight.data.add(parameters[name].data.mul(-1)))
         return norm
 
     def push(self, worker_id, parameters, epoch, **kwargs):
