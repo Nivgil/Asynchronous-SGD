@@ -22,13 +22,13 @@ def main():
         args.sim_num = idx * 10
         args.name = base_name + '_{}'.format(args.id)
         time = str(datetime.now())
-        min_error, mean_error = exec_unit(args)
+        scores = exec_unit(args)
         graph_path = create_graphs(sim_num=args.id, linear=True)
 
-        message = '{0}\nSimulation Number {1} Completed\nMin Error - {2:.3f}\nMean Error - {3:.3f}'.format(time,
-                                                                                                           args.id,
-                                                                                                           min_error,
-                                                                                                           mean_error)
+        message = '{0}\nSimulation Number {1} Completed\n' \
+                  'Min Error - {2:.3f}\n' \
+                  'Mean Error - {3:.3f}\n' \
+                  'Val Error - {4:.3f}'.format(time, args.id, scores[0], scores[1], scores[2])
         send_notification(message, vars(args), graph_path, args)
 
 
