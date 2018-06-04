@@ -117,6 +117,7 @@ class StatImage(object):
             return
         step_norm = self._step_norm
         t = range(1, len(step_norm) + 1)
+        handle.title.text = 'Step Norm v(t) Iterations Per Epoch - {}'.format(self._log.iterations_per_epoch)
         handle.line(t, step_norm, line_width=3, line_dash=line_dash, legend=legend, line_color=color)
 
     def _visualize_mean_master_dist(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):

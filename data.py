@@ -85,6 +85,6 @@ def load_data(args):
             batch_size=args.batch_size, shuffle=True, **kwargs)
         val_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
-            batch_size=1024, shuffle=False, **kwargs)
+            batch_size=1024, shuffle=False, drop_last=True, **kwargs)
 
     return train_loader, val_loader

@@ -46,6 +46,11 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
                              title="The Norm of Gradients", x_axis_type=x_scale, y_axis_type='linear')
     p_gradient_norm.background_fill_color = "#fafafa"
 
+    p_step_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
+                         x_axis_label='Iteration', y_axis_label='||v(t)||',
+                         title="Step norm (v(t))", x_axis_type=x_scale, y_axis_type=x_scale)
+    p_step_norm.background_fill_color = "#fafafa"
+
     p_mean_master_dist = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                                 x_axis_label=x_axis_label, y_axis_label='Distance Norm',
                                 title="Distance Norm Between Mean & Master Weights", x_axis_type=x_scale,
@@ -85,6 +90,7 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
                                 handle_mean_distance=p_weights_mean_distances,
                                 handle_master_distance=p_weights_master_distances,
                                 handle_mean_master_dist=p_mean_master_dist,
+                                handle_step_norm=p_step_norm,
                                 legend=legend,
                                 color=colors[idx % 10],
                                 line_dash='dashed',
@@ -107,7 +113,7 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
     p_gradient_norm.legend.location = "bottom_left"
 
     return [p_loss, p_error, p_weight_norm, p_gradient_norm, p_weights_mean_distances, p_weights_master_distances,
-            p_mean_master_dist], scores, param_logging
+            p_mean_master_dist, p_step_norm], scores, param_logging
 
 
 def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
@@ -133,11 +139,6 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
                            x_axis_label=x_axis_label, y_axis_label='||w(t)||',
                            title="The Norm of w(t)", x_axis_type=x_scale, y_axis_type=x_scale)
     p_weight_norm.background_fill_color = "#fafafa"
-
-    p_step_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
-                         x_axis_label=x_axis_label, y_axis_label='||v(t)||',
-                         title="Step norm (v(t))", x_axis_type=x_scale, y_axis_type=x_scale)
-    p_step_norm.background_fill_color = "#fafafa"
 
     p_gradient_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                              x_axis_label=x_axis_label, y_axis_label='||g||',
@@ -170,7 +171,6 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
                                     handle_error=p_error,
                                     handle_weight_norm=p_weight_norm,
                                     handle_gradient_norm=p_gradient_norm,
-                                    handle_step_norm=p_step_norm,
                                     legend='train - ' + legend,
                                     color=colors[idx % 10],
                                     line_dash='dashed',
