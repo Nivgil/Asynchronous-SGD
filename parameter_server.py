@@ -117,7 +117,7 @@ class ParameterServer(object):
         return mu_mean, torch.sqrt(mu_mean_norm)
 
     def _step_norm(self, parameters):
-        norm = torch.zeros(0)
+        norm = 0
         for name, weight in self._model.named_parameters():
             norm += norm + torch.abs(weight.data.add(parameters[name].data.mul(-1)))
         return norm
