@@ -140,6 +140,8 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         target_var = torch.autograd.Variable(target)
         # compute output
         t4 = time.time()
+        if i == train_loader.dataset.train_labels // len(target):
+            import ipdb;ipdb.set_trace()
         if current_accumulate_num == 0:
             model.zero_grad()
         output = model(input_var)
