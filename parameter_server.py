@@ -24,6 +24,7 @@ class ParameterServer(object):
         batch_baseline = args.baseline
         self._lr = args.lr * np.sqrt((args.workers_num * args.batch_size) // batch_baseline) / (args.workers_num)
         self._fast_im = args.fast_im
+        self._lr_warm_up = args.lr_warm_up
         self._current_lr = args.lr
         self._lr_points = self.get_lr_reduce_epochs(args.model)
         self._lr_factor = 0.2 if args.model == 'wideresnet' else 0.1
@@ -44,6 +45,12 @@ class ParameterServer(object):
         else:
             self._start_lr = 0
             self._lr_increment_const = 0
+        if args.lr_warm_up is True:
+            end_lr = args.lr
+            start_lr = 0
+            self._lr = end_lr
+            self._start_lr = start_lr
+            print('Learning Rate Warm Up [{:.5f}]->[{:.5f}]'.format(start_lr, end_lr))
 
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
                                           momentum=args.momentum,
@@ -84,24 +91,27 @@ class ParameterServer(object):
     def _adjust_learning_rate(self, epoch, iteration):
         lr = self._start_lr + self._lr_increment_const * (iteration + self._iterations_per_epoch * epoch)
         if lr < self._lr and self._fast_im is True:  # learning rate warm up phase
-            print('\nWarm up Learning Rate - [{:.5f}]'.format(lr))
+            print('\nWarm up Learning Rate Fast ImageNet - [{:.5f}]'.format(lr))
             for param_group in self._optimizer.param_groups:
                 param_group['lr'] = lr
         else:
-            lr = self._lr
-            for r in self._lr_points:
-                lr *= self._lr_factor ** int(epoch >= r)
-            if self._current_lr != lr:
-                print('Adjusting Learning Rate to [{0:.5f}]'.format(lr))
-                self._current_lr = lr
+            if self._lr_warm_up is True:
+                self._start_lr = self._start_lr * 0.9 + 1
+                lr = 0.1 * self._start_lr
+                print('Learning Rate Warm Up [{:.5f}]'.format(lr))
                 for param_group in self._optimizer.param_groups:
                     param_group['lr'] = lr
-        if epoch == 30 and self._fast_im is True:
-            if self._momentum == 0:
-                print('Turning Momentum On')
-                self._momentum = 0.9
-                for param_group in self._optimizer.param_groups:
-                    param_group['momentum'] = 0.9
+                if np.abs(lr - self._lr) < 1e-3:
+                    self._lr_warm_up = False
+            else:
+                lr = self._lr
+                for r in self._lr_points:
+                    lr *= self._lr_factor ** int(epoch >= r)
+                if self._current_lr != lr:
+                    print('Adjusting Learning Rate to [{0:.5f}]'.format(lr))
+                    self._current_lr = lr
+                    for param_group in self._optimizer.param_groups:
+                        param_group['lr'] = lr
         return lr
 
     def _calc_workers_mean(self):

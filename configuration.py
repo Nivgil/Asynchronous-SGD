@@ -44,6 +44,8 @@ def configuration():
                         help='train without regime adaptation')
     parser.add_argument('--fast_im', dest='fast_im', action='store_true',
                         help='1 hour image net training regime')
+    parser.add_argument('--lr_warm_up', dest='lr_warm_up', action='store_true',
+                        help='warm up learning rate instead of using momentum')
     parser.add_argument('--gbn', dest='gbn', action='store_true',
                         help='ghost batch normalization')
     parser.add_argument('--id', default=2000, type=int,
@@ -76,4 +78,6 @@ def configuration():
         args.regime = False
         # args.nesterov = True
     args.name = args.model
+    if args.lr_warm_up is True and args.momentum > 0:
+        Exception('Learning Rate Warm up Can\'t Run With Momentum')
     return args

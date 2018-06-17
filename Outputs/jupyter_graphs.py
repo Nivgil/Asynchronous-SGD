@@ -150,6 +150,12 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
                      title="Training & Test Error", x_axis_type=x_scale)
     p_error.background_fill_color = "#fafafa"
     p_error.yaxis[0].formatter = NumeralTickFormatter(format="0.0%")
+
+    p_step_norm = figure(plot_width=600, plot_height=600, min_border=10, min_border_left=50,
+                         x_axis_label='Iteration', y_axis_label='||v(t)||',
+                         title="Step norm (v(t))", x_axis_type=x_scale, y_axis_type=x_scale)
+    p_step_norm.background_fill_color = "#fafafa"
+
     scores = list()
     idx = -1
     for sim in sim_nums:
@@ -163,14 +169,17 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
                 stats_test, stats_train = pickle.load(pickle_in)
             with open(os.path.join(CONFIGURATIONS_DIR, folder_name, file + '_param.log'), 'rb') as log_file:
                 params_dict = json.load(log_file)
-            legend = str(params_dict['batch_size']) + '_' + \
-                     str(params_dict['workers_num']) + '_' + \
-                     str(params_dict['momentum'])
+            legend = '(' + str(params_dict['batch_size']) + ', ' + \
+                     str(params_dict['workers_num']) + ', ' + \
+                     str(params_dict['momentum']) + ', ' + \
+                     str(params_dict['dampening']) + ', ' + \
+                     str(params_dict['lr']) + ')'
 
             stats_train.export_data(handle_loss=p_loss,
                                     handle_error=p_error,
                                     handle_weight_norm=p_weight_norm,
                                     handle_gradient_norm=p_gradient_norm,
+                                    handle_step_norm=p_step_norm,
                                     legend='train - ' + legend,
                                     color=colors[idx % 10],
                                     line_dash='dashed',
@@ -190,7 +199,7 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
         p_gradient_norm.legend.click_policy = "hide"
         p_gradient_norm.legend.location = "top_left"
 
-    return [p_loss, p_error, p_weight_norm, p_gradient_norm], scores
+    return [p_loss, p_error, p_weight_norm, p_gradient_norm, p_step_norm], scores
 
 
 if __name__ == '__main__':

@@ -112,13 +112,17 @@ class StatImage(object):
                           self._iterations_per_epoch)
         handle.line(t, error, line_width=3, line_dash=line_dash, legend=legend, line_color=color)
 
-    def _visualize_step_norm(self, handle=None, legend=None, color=None, line_dash=None):
+    def _visualize_step_norm(self, handle=None, legend=None, color=None):
         if handle is None or len(self._step_norm) == 0:
             return
         step_norm = self._step_norm
         t = range(1, len(step_norm) + 1)
-        handle.title.text = 'Step Norm v(t) Iterations Per Epoch - {}'.format(self._log.iterations_per_epoch)
-        handle.line(t, step_norm, line_width=3, line_dash=line_dash, legend=legend, line_color=color)
+        if self._log.batch_size > 256 and self._log.model == 'resnet' and self._log.dataset == 'imagenet':
+            iterations_per_epoch = self._iterations_per_epoch * 256 // self._log.batch_size
+        else:
+            iterations_per_epoch = self._iterations_per_epoch
+        handle.title.text = 'Step Norm w(t+1)-w(t) | Iterations Per Epoch - {}'.format(iterations_per_epoch)
+        handle.line(t, step_norm, line_width=3, line_dash='solid', legend=legend, line_color=color)
 
     def _visualize_mean_master_dist(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
@@ -189,7 +193,7 @@ class StatImage(object):
         self._visualize_weights_mean_distances(handle_mean_distance, resolution)
         self._visualize_weights_master_distances(handle_master_distance, resolution)
         self._visualize_mean_master_dist(handle_mean_master_dist, legend, color, line_dash, resolution)
-        self._visualize_step_norm(handle_step_norm, legend, color, line_dash)
+        self._visualize_step_norm(handle_step_norm, legend, color)
 
     def get_scores(self, handle=None):
         error = self._error
