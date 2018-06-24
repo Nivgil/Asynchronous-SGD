@@ -8,13 +8,13 @@ batch_norm = nn.BatchNorm2d
 
 
 class BasicBlock(nn.Module):
-    def __init__(self, in_planes, out_planes, stride, dropRate=0.0):
+    def __init__(self, in_planes, out_planes, stride, dropRate=0.0, bn_momentum=0.1):
         super(BasicBlock, self).__init__()
-        self.bn1 = batch_norm(in_planes)
+        self.bn1 = batch_norm(in_planes, momentum=bn_momentum)
         self.relu1 = nn.ReLU(inplace=True)
         self.conv1 = nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                                padding=1, bias=False)
-        self.bn2 = batch_norm(out_planes)
+        self.bn2 = batch_norm(out_planes, momentum=bn_momentum)
         self.relu2 = nn.ReLU(inplace=True)
         self.conv2 = nn.Conv2d(out_planes, out_planes, kernel_size=3, stride=1,
                                padding=1, bias=False)
@@ -36,14 +36,14 @@ class BasicBlock(nn.Module):
 
 
 class NetworkBlock(nn.Module):
-    def __init__(self, nb_layers, in_planes, out_planes, block, stride, dropRate=0.0):
+    def __init__(self, nb_layers, in_planes, out_planes, block, stride, dropRate=0.0, bn_momentum=0.1):
         super(NetworkBlock, self).__init__()
-        self.layer = self._make_layer(block, in_planes, out_planes, nb_layers, stride, dropRate)
+        self.layer = self._make_layer(block, in_planes, out_planes, nb_layers, stride, dropRate, bn_momentum=bn_momentum)
 
-    def _make_layer(self, block, in_planes, out_planes, nb_layers, stride, dropRate):
+    def _make_layer(self, block, in_planes, out_planes, nb_layers, stride, dropRate, bn_momentum=0.1):
         layers = []
         for i in range(int(nb_layers)):
-            layers.append(block(i == 0 and in_planes or out_planes, out_planes, i == 0 and stride or 1, dropRate))
+            layers.append(block(i == 0 and in_planes or out_planes, out_planes, i == 0 and stride or 1, dropRate, bn_momentum))
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -51,7 +51,7 @@ class NetworkBlock(nn.Module):
 
 
 class WideResNet(nn.Module):
-    def __init__(self, depth, num_classes, widen_factor=1, dropRate=0.0, gbn=False):
+    def __init__(self, depth, num_classes, widen_factor=1, dropRate=0.0, gbn=False, bn_momentum=0.1):
         super(WideResNet, self).__init__()
         if gbn is True:
             global batch_norm
@@ -64,13 +64,13 @@ class WideResNet(nn.Module):
         self.conv1 = nn.Conv2d(3, nChannels[0], kernel_size=3, stride=1,
                                padding=1, bias=False)
         # 1st block
-        self.block1 = NetworkBlock(n, nChannels[0], nChannels[1], block, 1, dropRate)
+        self.block1 = NetworkBlock(n, nChannels[0], nChannels[1], block, 1, dropRate, bn_momentum=bn_momentum)
         # 2nd block
-        self.block2 = NetworkBlock(n, nChannels[1], nChannels[2], block, 2, dropRate)
+        self.block2 = NetworkBlock(n, nChannels[1], nChannels[2], block, 2, dropRate, bn_momentum=bn_momentum)
         # 3rd block
-        self.block3 = NetworkBlock(n, nChannels[2], nChannels[3], block, 2, dropRate)
+        self.block3 = NetworkBlock(n, nChannels[2], nChannels[3], block, 2, dropRate, bn_momentum=bn_momentum)
         # global average pooling and classifier
-        self.bn1 = batch_norm(nChannels[3])
+        self.bn1 = batch_norm(nChannels[3], momentum=bn_momentum)
         self.relu = nn.ReLU(inplace=True)
         self.fc = nn.Linear(nChannels[3], num_classes)
         self.nChannels = nChannels[3]
