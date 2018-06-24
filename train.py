@@ -62,19 +62,19 @@ def main(args):
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
-    for idx in (0, 1, 2):
-        model.module.layer1[idx].bn1.momentum = 1
-        model.module.layer1[idx].bn2.momentum = 1
-        model.module.layer1[idx].bn3.momentum = 1
-        model.module.layer2[idx].bn1.momentum = 1
-        model.module.layer2[idx].bn2.momentum = 1
-        model.module.layer2[idx].bn3.momentum = 1
-        model.module.layer3[idx].bn1.momentum = 1
-        model.module.layer3[idx].bn2.momentum = 1
-        model.module.layer3[idx].bn3.momentum = 1
-        model.module.layer4[idx].bn1.momentum = 1
-        model.module.layer4[idx].bn2.momentum = 1
-        model.module.layer4[idx].bn3.momentum = 1
+    # for idx in (0, 1, 2):
+    #     model.module.layer1[idx].bn1.momentum = 1
+    #     model.module.layer1[idx].bn2.momentum = 1
+    #     model.module.layer1[idx].bn3.momentum = 1
+    #     model.module.layer2[idx].bn1.momentum = 1
+    #     model.module.layer2[idx].bn2.momentum = 1
+    #     model.module.layer2[idx].bn3.momentum = 1
+    #     model.module.layer3[idx].bn1.momentum = 1
+    #     model.module.layer3[idx].bn2.momentum = 1
+    #     model.module.layer3[idx].bn3.momentum = 1
+    #     model.module.layer4[idx].bn1.momentum = 1
+    #     model.module.layer4[idx].bn2.momentum = 1
+    #     model.module.layer4[idx].bn3.momentum = 1
 
     cudnn.benchmark = True
     # define loss function (criterion) and optimizer
@@ -141,35 +141,35 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
     # switch to train mode
     model.train()
 
-    running_mean = dict()
-    running_var = dict()
+    # running_mean = dict()
+    # running_var = dict()
 
-    for idx in (0, 1, 2):
-        running_mean['model.module.layer1[{}].bn1'.format(idx)] = model.module.layer1[idx].bn1.running_mean.mul(0)
-        running_mean['model.module.layer1[{}].bn2'.format(idx)] = model.module.layer1[idx].bn2.running_mean.mul(0)
-        running_mean['model.module.layer1[{}].bn3'.format(idx)] = model.module.layer1[idx].bn3.running_mean.mul(0)
-        running_mean['model.module.layer2[{}].bn1'.format(idx)] = model.module.layer2[idx].bn1.running_mean.mul(0)
-        running_mean['model.module.layer2[{}].bn2'.format(idx)] = model.module.layer2[idx].bn2.running_mean.mul(0)
-        running_mean['model.module.layer2[{}].bn3'.format(idx)] = model.module.layer2[idx].bn3.running_mean.mul(0)
-        running_mean['model.module.layer3[{}].bn1'.format(idx)] = model.module.layer3[idx].bn1.running_mean.mul(0)
-        running_mean['model.module.layer3[{}].bn2'.format(idx)] = model.module.layer3[idx].bn2.running_mean.mul(0)
-        running_mean['model.module.layer3[{}].bn3'.format(idx)] = model.module.layer3[idx].bn3.running_mean.mul(0)
-        running_mean['model.module.layer4[{}].bn1'.format(idx)] = model.module.layer4[idx].bn1.running_mean.mul(0)
-        running_mean['model.module.layer4[{}].bn2'.format(idx)] = model.module.layer4[idx].bn2.running_mean.mul(0)
-        running_mean['model.module.layer4[{}].bn3'.format(idx)] = model.module.layer4[idx].bn3.running_mean.mul(0)
-
-        running_var['model.module.layer1[{}].bn1'.format(idx)] = model.module.layer1[idx].bn1.running_var.mul(0)
-        running_var['model.module.layer1[{}].bn2'.format(idx)] = model.module.layer1[idx].bn2.running_var.mul(0)
-        running_var['model.module.layer1[{}].bn3'.format(idx)] = model.module.layer1[idx].bn3.running_var.mul(0)
-        running_var['model.module.layer2[{}].bn1'.format(idx)] = model.module.layer2[idx].bn1.running_var.mul(0)
-        running_var['model.module.layer2[{}].bn2'.format(idx)] = model.module.layer2[idx].bn2.running_var.mul(0)
-        running_var['model.module.layer2[{}].bn3'.format(idx)] = model.module.layer2[idx].bn3.running_var.mul(0)
-        running_var['model.module.layer3[{}].bn1'.format(idx)] = model.module.layer3[idx].bn1.running_var.mul(0)
-        running_var['model.module.layer3[{}].bn2'.format(idx)] = model.module.layer3[idx].bn2.running_var.mul(0)
-        running_var['model.module.layer3[{}].bn3'.format(idx)] = model.module.layer3[idx].bn3.running_var.mul(0)
-        running_var['model.module.layer4[{}].bn1'.format(idx)] = model.module.layer4[idx].bn1.running_var.mul(0)
-        running_var['model.module.layer4[{}].bn2'.format(idx)] = model.module.layer4[idx].bn2.running_var.mul(0)
-        running_var['model.module.layer4[{}].bn3'.format(idx)] = model.module.layer4[idx].bn3.running_var.mul(0)
+    # for idx in (0, 1, 2):
+    #     running_mean['model.module.layer1[{}].bn1'.format(idx)] = model.module.layer1[idx].bn1.running_mean.mul(0)
+    #     running_mean['model.module.layer1[{}].bn2'.format(idx)] = model.module.layer1[idx].bn2.running_mean.mul(0)
+    #     running_mean['model.module.layer1[{}].bn3'.format(idx)] = model.module.layer1[idx].bn3.running_mean.mul(0)
+    #     running_mean['model.module.layer2[{}].bn1'.format(idx)] = model.module.layer2[idx].bn1.running_mean.mul(0)
+    #     running_mean['model.module.layer2[{}].bn2'.format(idx)] = model.module.layer2[idx].bn2.running_mean.mul(0)
+    #     running_mean['model.module.layer2[{}].bn3'.format(idx)] = model.module.layer2[idx].bn3.running_mean.mul(0)
+    #     running_mean['model.module.layer3[{}].bn1'.format(idx)] = model.module.layer3[idx].bn1.running_mean.mul(0)
+    #     running_mean['model.module.layer3[{}].bn2'.format(idx)] = model.module.layer3[idx].bn2.running_mean.mul(0)
+    #     running_mean['model.module.layer3[{}].bn3'.format(idx)] = model.module.layer3[idx].bn3.running_mean.mul(0)
+    #     running_mean['model.module.layer4[{}].bn1'.format(idx)] = model.module.layer4[idx].bn1.running_mean.mul(0)
+    #     running_mean['model.module.layer4[{}].bn2'.format(idx)] = model.module.layer4[idx].bn2.running_mean.mul(0)
+    #     running_mean['model.module.layer4[{}].bn3'.format(idx)] = model.module.layer4[idx].bn3.running_mean.mul(0)
+    #
+    #     running_var['model.module.layer1[{}].bn1'.format(idx)] = model.module.layer1[idx].bn1.running_var.mul(0)
+    #     running_var['model.module.layer1[{}].bn2'.format(idx)] = model.module.layer1[idx].bn2.running_var.mul(0)
+    #     running_var['model.module.layer1[{}].bn3'.format(idx)] = model.module.layer1[idx].bn3.running_var.mul(0)
+    #     running_var['model.module.layer2[{}].bn1'.format(idx)] = model.module.layer2[idx].bn1.running_var.mul(0)
+    #     running_var['model.module.layer2[{}].bn2'.format(idx)] = model.module.layer2[idx].bn2.running_var.mul(0)
+    #     running_var['model.module.layer2[{}].bn3'.format(idx)] = model.module.layer2[idx].bn3.running_var.mul(0)
+    #     running_var['model.module.layer3[{}].bn1'.format(idx)] = model.module.layer3[idx].bn1.running_var.mul(0)
+    #     running_var['model.module.layer3[{}].bn2'.format(idx)] = model.module.layer3[idx].bn2.running_var.mul(0)
+    #     running_var['model.module.layer3[{}].bn3'.format(idx)] = model.module.layer3[idx].bn3.running_var.mul(0)
+    #     running_var['model.module.layer4[{}].bn1'.format(idx)] = model.module.layer4[idx].bn1.running_var.mul(0)
+    #     running_var['model.module.layer4[{}].bn2'.format(idx)] = model.module.layer4[idx].bn2.running_var.mul(0)
+    #     running_var['model.module.layer4[{}].bn3'.format(idx)] = model.module.layer4[idx].bn3.running_var.mul(0)
 
     t1 = time.time()
     for i, (input, target) in enumerate(train_loader):
@@ -190,32 +190,32 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
             model.zero_grad()
         output = model(input_var)
 
-        for idx in (0, 1, 2):
-            running_mean['model.module.layer1[{}].bn1'.format(idx)] += model.module.layer1[idx].bn1.running_mean
-            running_mean['model.module.layer1[{}].bn2'.format(idx)] += model.module.layer1[idx].bn2.running_mean
-            running_mean['model.module.layer1[{}].bn3'.format(idx)] += model.module.layer1[idx].bn3.running_mean
-            running_mean['model.module.layer2[{}].bn1'.format(idx)] += model.module.layer2[idx].bn1.running_mean
-            running_mean['model.module.layer2[{}].bn2'.format(idx)] += model.module.layer2[idx].bn2.running_mean
-            running_mean['model.module.layer2[{}].bn3'.format(idx)] += model.module.layer2[idx].bn3.running_mean
-            running_mean['model.module.layer3[{}].bn1'.format(idx)] += model.module.layer3[idx].bn1.running_mean
-            running_mean['model.module.layer3[{}].bn2'.format(idx)] += model.module.layer3[idx].bn2.running_mean
-            running_mean['model.module.layer3[{}].bn3'.format(idx)] += model.module.layer3[idx].bn3.running_mean
-            running_mean['model.module.layer4[{}].bn1'.format(idx)] += model.module.layer4[idx].bn1.running_mean
-            running_mean['model.module.layer4[{}].bn2'.format(idx)] += model.module.layer4[idx].bn2.running_mean
-            running_mean['model.module.layer4[{}].bn3'.format(idx)] += model.module.layer4[idx].bn3.running_mean
-
-            running_var['model.module.layer1[{}].bn1'.format(idx)] += model.module.layer1[idx].bn1.running_var
-            running_var['model.module.layer1[{}].bn2'.format(idx)] += model.module.layer1[idx].bn2.running_var
-            running_var['model.module.layer1[{}].bn3'.format(idx)] += model.module.layer1[idx].bn3.running_var
-            running_var['model.module.layer2[{}].bn1'.format(idx)] += model.module.layer2[idx].bn1.running_var
-            running_var['model.module.layer2[{}].bn2'.format(idx)] += model.module.layer2[idx].bn2.running_var
-            running_var['model.module.layer2[{}].bn3'.format(idx)] += model.module.layer2[idx].bn3.running_var
-            running_var['model.module.layer3[{}].bn1'.format(idx)] += model.module.layer3[idx].bn1.running_var
-            running_var['model.module.layer3[{}].bn2'.format(idx)] += model.module.layer3[idx].bn2.running_var
-            running_var['model.module.layer3[{}].bn3'.format(idx)] += model.module.layer3[idx].bn3.running_var
-            running_var['model.module.layer4[{}].bn1'.format(idx)] += model.module.layer4[idx].bn1.running_var
-            running_var['model.module.layer4[{}].bn2'.format(idx)] += model.module.layer4[idx].bn2.running_var
-            running_var['model.module.layer4[{}].bn3'.format(idx)] += model.module.layer4[idx].bn3.running_var
+        # for idx in (0, 1, 2):
+        #     running_mean['model.module.layer1[{}].bn1'.format(idx)] += model.module.layer1[idx].bn1.running_mean
+        #     running_mean['model.module.layer1[{}].bn2'.format(idx)] += model.module.layer1[idx].bn2.running_mean
+        #     running_mean['model.module.layer1[{}].bn3'.format(idx)] += model.module.layer1[idx].bn3.running_mean
+        #     running_mean['model.module.layer2[{}].bn1'.format(idx)] += model.module.layer2[idx].bn1.running_mean
+        #     running_mean['model.module.layer2[{}].bn2'.format(idx)] += model.module.layer2[idx].bn2.running_mean
+        #     running_mean['model.module.layer2[{}].bn3'.format(idx)] += model.module.layer2[idx].bn3.running_mean
+        #     running_mean['model.module.layer3[{}].bn1'.format(idx)] += model.module.layer3[idx].bn1.running_mean
+        #     running_mean['model.module.layer3[{}].bn2'.format(idx)] += model.module.layer3[idx].bn2.running_mean
+        #     running_mean['model.module.layer3[{}].bn3'.format(idx)] += model.module.layer3[idx].bn3.running_mean
+        #     running_mean['model.module.layer4[{}].bn1'.format(idx)] += model.module.layer4[idx].bn1.running_mean
+        #     running_mean['model.module.layer4[{}].bn2'.format(idx)] += model.module.layer4[idx].bn2.running_mean
+        #     running_mean['model.module.layer4[{}].bn3'.format(idx)] += model.module.layer4[idx].bn3.running_mean
+        #
+        #     running_var['model.module.layer1[{}].bn1'.format(idx)] += model.module.layer1[idx].bn1.running_var
+        #     running_var['model.module.layer1[{}].bn2'.format(idx)] += model.module.layer1[idx].bn2.running_var
+        #     running_var['model.module.layer1[{}].bn3'.format(idx)] += model.module.layer1[idx].bn3.running_var
+        #     running_var['model.module.layer2[{}].bn1'.format(idx)] += model.module.layer2[idx].bn1.running_var
+        #     running_var['model.module.layer2[{}].bn2'.format(idx)] += model.module.layer2[idx].bn2.running_var
+        #     running_var['model.module.layer2[{}].bn3'.format(idx)] += model.module.layer2[idx].bn3.running_var
+        #     running_var['model.module.layer3[{}].bn1'.format(idx)] += model.module.layer3[idx].bn1.running_var
+        #     running_var['model.module.layer3[{}].bn2'.format(idx)] += model.module.layer3[idx].bn2.running_var
+        #     running_var['model.module.layer3[{}].bn3'.format(idx)] += model.module.layer3[idx].bn3.running_var
+        #     running_var['model.module.layer4[{}].bn1'.format(idx)] += model.module.layer4[idx].bn1.running_var
+        #     running_var['model.module.layer4[{}].bn2'.format(idx)] += model.module.layer4[idx].bn2.running_var
+        #     running_var['model.module.layer4[{}].bn3'.format(idx)] += model.module.layer4[idx].bn3.running_var
 
         loss = criterion(output, target_var)
         loss.div_(batch_accumulate_num)  # instead of normalizing gradients
@@ -246,11 +246,11 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
                                                                          error_avg=train_error.avg)
             logging.info(log_str, extra=client)
             print(log_str)
-    for name, val in running_mean.items():
-        val.div_(i)
-        running_var[name].div_(i)
-        print('name running mean - {}'.format(val))
-        print('name running var - {}'.format(running_var[name]))
+    # for name, val in running_mean.items():
+    #     val.div_(i)
+    #     running_var[name].div_(i)
+    #     print('name running mean - {}'.format(val))
+    #     print('name running var - {}'.format(running_var[name]))
     return train_loss.avg, train_error.avg
 
 
