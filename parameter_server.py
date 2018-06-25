@@ -124,6 +124,7 @@ class ParameterServer(object):
             momentum = 0
         if momentum != self._current_momentum:
             self._current_momentum = momentum
+            self._lr = 1
             print('Adjusting Momentum to [{0:.3f}]'.format(momentum))
             logging.info('Adjusting Momentum to [{0:.3f}]'.format(momentum), extra=self._client)
             for param_group in self._optimizer.param_groups:
@@ -218,8 +219,8 @@ class ASGD(ParameterServer):
 
     def push(self, worker_id, parameters, epoch, **kwargs):
         step_norm = self._step_norm(parameters)
-        self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._adjust_momentum(epoch, kwargs['iteration'])
+        self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
         self._set_model_gradients(parameters)
         self._optimizer.step()
