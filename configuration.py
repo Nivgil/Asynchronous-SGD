@@ -38,8 +38,6 @@ def configuration():
                         help='gradient clipping threshold')
     parser.add_argument('--no_pbar', dest='bar', action='store_false',
                         help='show progress bar (default: False)')
-    parser.add_argument('--time_p', dest='p_time', action='store_true',
-                        help='show iteration time analysis')
     parser.add_argument('--no_regime', dest='regime', action='store_false',
                         help='train without regime adaptation')
     parser.add_argument('--fast_im', dest='fast_im', action='store_true',
@@ -48,7 +46,7 @@ def configuration():
                         help='warm up learning rate instead of using momentum')
     parser.add_argument('--gbn', dest='gbn', action='store_true',
                         help='ghost batch normalization')
-    parser.add_argument('--id', default=2000, type=int,
+    parser.add_argument('--id', default=9000, type=int,
                         help='simulation number')
     parser.add_argument('--save', default=100, type=int,
                         help='save simulation state every X epochs')
