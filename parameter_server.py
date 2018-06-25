@@ -2,7 +2,6 @@ import torch
 import numpy as np
 from copy import deepcopy
 from math import sqrt
-import time
 
 
 class ParameterServer(object):
