@@ -79,7 +79,7 @@ def main(args):
     for epoch in range(args.start_epoch, args.epochs):
         # train for one epoch
         train_loss, train_error = train(train_loader, model, criterion, server, epoch, args.workers_num, args.grad_clip,
-                                        batch_accumulate_num, train_bar, args.p_time, train_statistics, args.client)
+                                        batch_accumulate_num, train_bar, train_statistics, args.client)
 
         train_time = time.time() - train_time
         if args.bar is True:
@@ -119,7 +119,7 @@ def main(args):
 
 
 def train(train_loader, model, criterion, server, epoch, workers_number, grad_clip, batch_accumulate_num, bar,
-          iteration_print, statistics, client):
+          statistics, client):
     """Train for one epoch on the training set"""
     train_error = AverageMeter()
     train_loss = AverageMeter()
