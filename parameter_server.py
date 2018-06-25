@@ -113,6 +113,15 @@ class ParameterServer(object):
                         param_group['lr'] = lr
         return lr
 
+    def _adjust_momentum(self, epoch, iteration):
+        if epoch < 5:
+            momentum = self._momentum
+        else:
+            momentum = 0
+        for param_group in self._optimizer.param_groups:
+            param_group['momentum'] = momentum
+        return momentum
+
     def _calc_workers_mean(self):
         mu_mean = {}
         mu_mean_norm = torch.zeros(1)
@@ -202,6 +211,7 @@ class ASGD(ParameterServer):
     def push(self, worker_id, parameters, epoch, **kwargs):
         step_norm = self._step_norm(parameters)
         self._adjust_learning_rate(epoch, kwargs['iteration'])
+        self._adjust_momentum(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
         self._set_model_gradients(parameters)
         self._optimizer.step()
