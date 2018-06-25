@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from copy import deepcopy
 from math import sqrt
+import logging
 
 
 class ParameterServer(object):
@@ -25,10 +26,12 @@ class ParameterServer(object):
         self._fast_im = args.fast_im
         self._lr_warm_up = args.lr_warm_up
         self._current_lr = args.lr
+        self._current_momentum = args.momentum
         self._lr_points = self.get_lr_reduce_epochs(args.model)
         self._lr_factor = 0.2 if args.model == 'wideresnet' else 0.1
         self._iterations_per_epoch = args.iterations_per_epoch
         self._momentum = args.momentum
+        self._client = args.client
 
         if args.regime is True:
             alpha = args.workers_num * args.batch_size // batch_baseline
@@ -108,6 +111,7 @@ class ParameterServer(object):
                     lr *= self._lr_factor ** int(epoch >= r)
                 if self._current_lr != lr:
                     print('Adjusting Learning Rate to [{0:.5f}]'.format(lr))
+                    logging.info('Adjusting Learning Rate to [{0:.5f}]'.format(lr), extra=self._client)
                     self._current_lr = lr
                     for param_group in self._optimizer.param_groups:
                         param_group['lr'] = lr
@@ -118,8 +122,12 @@ class ParameterServer(object):
             momentum = self._momentum
         else:
             momentum = 0
-        for param_group in self._optimizer.param_groups:
-            param_group['momentum'] = momentum
+        if momentum != self._current_momentum:
+            self._current_momentum = momentum
+            print('Adjusting Momentum to [{0:.3f}]'.format(momentum))
+            logging.info('Adjusting Momentum to [{0:.3f}]'.format(momentum), extra=self._client)
+            for param_group in self._optimizer.param_groups:
+                param_group['momentum'] = momentum
         return momentum
 
     def _calc_workers_mean(self):
