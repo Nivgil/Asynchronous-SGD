@@ -71,7 +71,7 @@ def main(args):
     else:
         train_bar = None
         val_bar = None
-    log_str = '{}: Training neural network for {} epochs with {} workers'.format(args.sim_num, args.epochs,
+    log_str = '{}: Training neural network for {} epochs with {} workers'.format(args.id, args.epochs,
                                                                                  args.workers_num)
     logging.info(log_str, extra=args.client)
     print(log_str)
