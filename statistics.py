@@ -26,7 +26,6 @@ class StatImage(object):
         self._mean_master_dist = []
         self._epochs = args.epochs
         self._log = args
-        self._sim_num = args.sim_num
         self._iterations_per_epoch = args.iterations_per_epoch
         self._dataset = args.dataset
         self._model = args.model
