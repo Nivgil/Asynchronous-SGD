@@ -26,6 +26,7 @@ class ParameterServer(object):
         self._fast_im = args.fast_im
         self._lr_warm_up = args.lr_warm_up
         self._current_lr = args.lr
+        self._m_off = args.m_off
         self._current_momentum = args.momentum
         self._lr_points = self.get_lr_reduce_epochs(args.model)
         self._lr_factor = 0.2 if args.model == 'wideresnet' else 0.1
@@ -118,6 +119,8 @@ class ParameterServer(object):
         return lr
 
     def _adjust_momentum(self, epoch, iteration):
+        if self._m_off is False:
+            return
         if epoch < 5:
             momentum = self._momentum
         else:
@@ -129,6 +132,8 @@ class ParameterServer(object):
             logging.info('Adjusting Momentum to [{0:.3f}]'.format(momentum), extra=self._client)
             for param_group in self._optimizer.param_groups:
                 param_group['momentum'] = momentum
+            for param_group in self._optimizer.param_groups:
+                param_group['dampening'] = momentum
         return momentum
 
     def _calc_workers_mean(self):

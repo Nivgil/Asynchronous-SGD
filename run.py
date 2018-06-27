@@ -17,9 +17,10 @@ from datetime import datetime
 def main():
     args = configuration()
     base_name = args.name
+    base_id = args.id
 
     for idx in range(1, 2):
-        args.sim_num = idx * 10
+        args.id = base_id + idx - 1
         args.name = base_name + '_{}'.format(args.id)
         time = str(datetime.now())
         scores = exec_unit(args)

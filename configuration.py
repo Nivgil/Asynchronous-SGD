@@ -30,8 +30,6 @@ def configuration():
                         help='path to latest checkpoint (default: none)')
     parser.add_argument('--name', default='WideResNet-28-2', type=str,
                         help='name of experiment')
-    parser.add_argument('--sim_num', default='1', type=int,
-                        help='simulation id')
     parser.add_argument('--workers_num', default=1, type=int,
                         help='number of workers')
     parser.add_argument('--grad_clip', default=1000, type=float,
@@ -42,6 +40,8 @@ def configuration():
                         help='train without regime adaptation')
     parser.add_argument('--fast_im', dest='fast_im', action='store_true',
                         help='1 hour image net training regime')
+    parser.add_argument('--m_off', dest='m_off', action='store_true',
+                        help='Turn off momentum after warm up')
     parser.add_argument('--lr_warm_up', dest='lr_warm_up', action='store_true',
                         help='warm up learning rate instead of using momentum')
     parser.add_argument('--gbn', dest='gbn', action='store_true',

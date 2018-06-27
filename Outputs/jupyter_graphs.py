@@ -173,7 +173,8 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
                      str(params_dict['workers_num']) + ', ' + \
                      str(params_dict['momentum']) + ', ' + \
                      str(params_dict['dampening']) + ', ' + \
-                     str(params_dict['lr']) + ')'
+                     str(params_dict['lr']) + ', ' + \
+                     str(params_dict['id']) + ')'
 
             stats_train.export_data(handle_loss=p_loss,
                                     handle_error=p_error,
