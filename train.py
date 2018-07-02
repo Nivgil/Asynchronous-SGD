@@ -66,6 +66,7 @@ def main(args):
 
     # Synchronous to Asynchronous Adjustments
     print('Resetting Parameter Server to Asynchronous Mode')
+    logging.info('Resetting Parameter Server to Asynchronous Mode', extra=args.client)
     server._shards_weights = list()
     weights = server._get_model_weights()
     for i in range(0, args.workers_num):
@@ -81,13 +82,16 @@ def main(args):
     server._current_momentum = args.momentum
     server._iterations_per_epoch = args.iterations_per_epoch
     server._momentum = args.momentum
+    server._client = args.client
     if args.fast_im is True:
         end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
         start_lr = args.lr / (args.workers_num)
         server._lr = end_lr
         server._start_lr = start_lr
         server._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
-        print('Fast ImageNet Mode - Warm Up [{:.5f}]->[{:.5f}] In 5 Epochs'.format(start_lr, end_lr))
+        log_str = 'Fast ImageNet Mode - Warm Up [{:.5f}]->[{:.5f}] In 5 Epochs'.format(start_lr, end_lr)
+        logging.info(log_str, extra=args.client)
+        print(log_str)
     else:
         server._start_lr = 0
         server._lr_increment_const = 0
