@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 from progress.bar import IncrementalBar
+from copy import deepcopy
+import numpy as np
 
 from models.models import get_model
 
@@ -62,6 +64,38 @@ def main(args):
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
+    # Synchronous to Asynchronous Adjustments
+    print('Resetting Parameter Server to Asynchronous Mode')
+    server._shards_weights = list()
+    weights = server._get_model_weights()
+    for i in range(0, args.workers_num):
+        server._shards_weights.append(deepcopy(weights))
+    server._workers_num = args.workers_num
+    # learning rate initialization
+    batch_baseline = args.baseline
+    server._lr = args.lr * np.sqrt((args.workers_num * args.batch_size) // batch_baseline) / (args.workers_num)
+    server._fast_im = args.fast_im
+    server._lr_warm_up = args.lr_warm_up
+    server._current_lr = args.lr
+    server._m_off = args.m_off
+    server._current_momentum = args.momentum
+    server._iterations_per_epoch = args.iterations_per_epoch
+    server._momentum = args.momentum
+    if args.fast_im is True:
+        end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
+        start_lr = args.lr / (args.workers_num)
+        server._lr = end_lr
+        server._start_lr = start_lr
+        server._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
+        print('Fast ImageNet Mode - Warm Up [{:.5f}]->[{:.5f}] In 5 Epochs'.format(start_lr, end_lr))
+    else:
+        server._start_lr = 0
+        server._lr_increment_const = 0
+    for param_group in server._optimizer.param_groups:
+        param_group['lr'] = start_lr
+        param_group['momenum'] = server._momentum
+    # Synchronous to Asynchronous Adjustments - End
+
     cudnn.benchmark = True
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
@@ -102,7 +136,7 @@ def main(args):
             val_bar.index = 0
 
         log_str = 'Epoch [{0:1d}]: Train: Time [{1:.2f}], Loss [{2:.3f}], Error[{3:.3f}] | ' \
-                  'Test: Time [{4:.2f}], Loss [{5:.3f}], Error[{6:.3f}]'.format(epoch, train_time, train_loss,
+                  'Test: Time [{4:.2f}], Loss [{5:.3f}], Error[{6:.3f}]'.format(epoch + 1, train_time, train_loss,
                                                                                 train_error, val_time, val_loss,
                                                                                 val_error)
         logging.info(log_str, extra=args.client)
