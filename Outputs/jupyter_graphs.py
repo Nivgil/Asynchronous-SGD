@@ -199,6 +199,8 @@ def compare_graphs(sim_nums=None, resolution='epoch', linear=False):
         p_weight_norm.legend.location = "top_left"
         p_gradient_norm.legend.click_policy = "hide"
         p_gradient_norm.legend.location = "top_left"
+        p_step_norm.legend.click_policy = "hide"
+        p_step_norm.legend.location = "top_right"
 
     return [p_loss, p_error, p_weight_norm, p_gradient_norm, p_step_norm], scores
 
