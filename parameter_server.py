@@ -60,6 +60,15 @@ class ParameterServer(object):
                                           dampening=args.dampening,
                                           nesterov=args.nesterov,
                                           weight_decay=args.weight_decay)
+        # debug dampening
+        self._model_dampening = deepcopy(model)
+        self._optimizer_dampening = torch.optim.SGD(self._model.parameters(), 1,
+                                                    momentum=0.9,
+                                                    dampening=0.9,
+                                                    nesterov=args.nesterov,
+                                                    weight_decay=args.weight_decay)
+        # end debug dampening
+
         self._shards_weights = list()
         weights = self._get_model_weights()
         for i in range(0, args.workers_num):
@@ -224,10 +233,20 @@ class ASGD(ParameterServer):
 
     def push(self, worker_id, parameters, epoch, **kwargs):
         step_norm = self._step_norm(parameters)
-        import ipdb; ipdb.set_trace()
+        import ipdb;ipdb.set_trace()
         self._adjust_momentum(epoch, kwargs['iteration'])
         self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
+        # debug dampening
+        self._optimizer_dampening.zero_grad()
+        for name, weight in self._model_dampening.named_parameters():
+            if torch.cuda.is_available() is True:
+                weight.grad = parameters[name].cuda()
+            else:
+                weight.grad = parameters[name]
+        self._optimizer_dampening.step()
+        # debug end dampening
+
         self._set_model_gradients(parameters)
         self._optimizer.step()
         self._shards_weights[worker_id] = self._get_model_weights()
