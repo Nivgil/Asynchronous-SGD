@@ -61,8 +61,8 @@ class ParameterServer(object):
                                           nesterov=args.nesterov,
                                           weight_decay=args.weight_decay)
         # debug dampening
-        self._model_dampening = deepcopy(model)
-        self._optimizer_dampening = torch.optim.SGD(self._model.parameters(), 1,
+        self._model_dampening = deepcopy(model) # TODO debug
+        self._optimizer_dampening = torch.optim.SGD(self._model_dampening.parameters(), 1,
                                                     momentum=0.9,
                                                     dampening=0.9,
                                                     nesterov=args.nesterov,
@@ -232,10 +232,10 @@ class ASGD(ParameterServer):
         super().__init__(*args, **kwargs)
 
     def push(self, worker_id, parameters, epoch, **kwargs):
-        step_norm = self._step_norm(parameters)
+        # step_norm = self._step_norm(parameters)
         import ipdb;ipdb.set_trace()
-        self._adjust_momentum(epoch, kwargs['iteration'])
-        self._adjust_learning_rate(epoch, kwargs['iteration'])
+        # self._adjust_momentum(epoch, kwargs['iteration'])
+        # self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
         # debug dampening
         self._optimizer_dampening.zero_grad()
@@ -247,10 +247,10 @@ class ASGD(ParameterServer):
         self._optimizer_dampening.step()
         # debug end dampening
 
-        self._set_model_gradients(parameters)
+        self._set_model_gradients(deepcopy(parameters))
         self._optimizer.step()
         self._shards_weights[worker_id] = self._get_model_weights()
-        return step_norm
+        # return step_norm
 
     def pull(self, worker_id):
         return self._shards_weights[worker_id]
