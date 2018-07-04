@@ -224,6 +224,7 @@ class ASGD(ParameterServer):
 
     def push(self, worker_id, parameters, epoch, **kwargs):
         step_norm = self._step_norm(parameters)
+        import ipdb; ipdb.set_trace()
         self._adjust_momentum(epoch, kwargs['iteration'])
         self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
