@@ -52,7 +52,7 @@ class Proj(nn.Module):
     def __init__(self, input_size, output_size, bias=True, init_scale=10):
         super(Proj, self).__init__()
         if init_scale is not None:
-            self.weight = nn.Parameter(torch.Tensor(1).fill_(init_scale))
+            self.weight = Variable(torch.Tensor(1).fill_(init_scale), requires_grad=False)#nn.Parameter(torch.Tensor(1).fill_(init_scale))
         if bias:
             self.bias = nn.Parameter(torch.Tensor(output_size).fill_(0))
         self.proj = Variable(torch.Tensor(
