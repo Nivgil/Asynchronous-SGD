@@ -145,7 +145,7 @@ def main(args):
                                                                                 val_error)
         logging.info(log_str, extra=args.client)
         print(log_str)
-        if epoch % args.save == 0:
+        if epoch % args.save == 0 and epoch > 0:
             save_checkpoint({'epoch': epoch + 1,
                              'state_dict': model.state_dict(),
                              'val_stats': val_statistics,
