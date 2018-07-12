@@ -19,7 +19,7 @@ def main():
     base_name = args.name
     base_id = args.id
 
-    for idx in range(1, 2):
+    for idx in range(1, 6):
         args.id = base_id + idx - 1
         args.name = base_name + '_{}'.format(args.id)
         time = str(datetime.now())
