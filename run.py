@@ -21,6 +21,9 @@ def main():
 
     for idx in range(1, 6):
         args.id = base_id + idx - 1
+        seed_val = random.randrange(10000000)
+        seed_system(seed_val)
+        args.seed = seed_val
         args.name = base_name + '_{}'.format(args.id)
         time = str(datetime.now())
         scores = exec_unit(args)
@@ -66,11 +69,17 @@ def exec_unit(args=None):
     return stats_test.get_scores()
 
 
+def seed_system(seed_val=None):
+    if seed_val is None:  # generate seed
+        seed_val = random.randrange(10000000)
+    torch.manual_seed(seed_val)
+    torch.cuda.manual_seed_all(seed_val)
+    random.seed(seed_val)
+    np.random.seed(seed_val)
+
+
 if __name__ == '__main__':
-    torch.manual_seed(214)
-    torch.cuda.manual_seed_all(214)
-    random.seed(214)
-    np.random.seed(214)
+    seed_system()
     warnings.filterwarnings('ignore')
     # torch.backends.cudnn.enabled = False
     main()
