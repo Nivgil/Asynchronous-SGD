@@ -136,7 +136,7 @@ class ParameterServer(object):
             momentum = 0
         if momentum != self._current_momentum:
             self._current_momentum = momentum
-            self._lr = 1.4
+            self._lr = 1
             print('Adjusting Momentum to [{0:.3f}]'.format(momentum))
             logging.info('Adjusting Momentum to [{0:.3f}]'.format(momentum), extra=self._client)
             for param_group in self._optimizer.param_groups:
