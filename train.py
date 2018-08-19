@@ -156,6 +156,12 @@ def main(args):
     return train_statistics, val_statistics
 
 
+def wd_pre_step(model, weight_decay=1e-4):
+    with torch.no_grad():
+        for m in model.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+                m.weight.grad.add_(weight_decay * m.weight)
+
 def train(train_loader, model, criterion, server, epoch, workers_number, grad_clip, batch_accumulate_num, bar,
           statistics, client):
     """Train for one epoch on the training set"""
@@ -180,6 +186,7 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         loss = criterion(output, target_var)
         loss.div_(batch_accumulate_num)  # instead of normalizing gradients
         loss.backward()
+        wd_pre_step(model)
         if grad_clip < 1000:
             torch.nn.utils.clip_grad_norm(model.parameters(), grad_clip)
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
