@@ -59,7 +59,7 @@ class ParameterServer(object):
                                           momentum=args.momentum,
                                           dampening=args.dampening,
                                           nesterov=args.nesterov,
-                                          weight_decay=args.weight_decay)
+                                          weight_decay=0)#already done in train --- args.weight_decay)
         # # debug dampening
         # self._model_dampening = deepcopy(model)
         # self._optimizer_dampening = torch.optim.SGD(self._model_dampening.parameters(), 1,
