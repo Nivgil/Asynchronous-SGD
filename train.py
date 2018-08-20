@@ -126,7 +126,8 @@ def main(args):
 
         # evaluate on validation set
         val_time = time.time()
-        val_loss, val_error = validate(val_loader, model, criterion, server, val_statistics, val_bar)
+        with torch.no_grad():
+            val_loss, val_error = validate(val_loader, model, criterion, server, val_statistics, val_bar)
         train_statistics.save_loss(train_loss)
         train_statistics.save_error(train_error)
         train_statistics.save_weight_mean_dist(server.get_workers_mean_statistics())
@@ -177,13 +178,11 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
             set_model_weights(server.pull(current_worker), model)
         target = target.cuda(async=True)
         input = input.cuda()
-        input_var = torch.autograd.Variable(input)
-        target_var = torch.autograd.Variable(target)
         # compute output
         if current_accumulate_num == 0:
             model.zero_grad()
-        output = model(input_var)
-        loss = criterion(output, target_var)
+        output = model(input)
+        loss = criterion(output, target)
         loss.div_(batch_accumulate_num)  # instead of normalizing gradients
         loss.backward()
         wd_pre_step(model)
@@ -215,11 +214,9 @@ def validate(data_loader, model, criterion, server, statistics, bar):
     for i, (input, target) in enumerate(data_loader):
         target = target.cuda(async=True)
         input = input.cuda()
-        input_var = torch.autograd.Variable(input, volatile=True)
-        target_var = torch.autograd.Variable(target, volatile=True)
         # compute output
-        output = model(input_var)
-        loss = criterion(output, target_var)
+        output = model(input)
+        loss = criterion(output, target)
 
         # measure accuracy and record loss
         total_loss.update(loss.data[0], input.size(0))
