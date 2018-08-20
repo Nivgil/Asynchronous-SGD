@@ -20,6 +20,15 @@ def init_model(model):
         elif isinstance(m, nn.BatchNorm2d):
             m.weight.data.fill_(1)
             m.bias.data.zero_()
+    for m in model.modules():
+        if isinstance(m, Bottleneck):
+            nn.init.constant_(m.bn3.weight, 0)
+        elif isinstance(m, BasicBlock):
+            nn.init.constant_(m.bn2.weight, 0)
+
+    model.fc.weight.data.normal_(0, 0.01)
+    model.fc.bias.data.zero_()
+
 
 
 class BasicBlock(nn.Module):
@@ -157,11 +166,10 @@ class ResNet_imagenet(ResNet):
 
         init_model(self)
         self.regime = {
-            0: {'optimizer': 'SGD', 'lr': 1e-1,
-                'weight_decay': 1e-4, 'momentum': 0.9},
+            0: {'optimizer': 'SGD', 'lr': 1e-1, 'momentum': 0.9},
             30: {'lr': 1e-2},
             60: {'lr': 1e-3},
-            90: {'lr': 1e-4}
+            80: {'lr': 1e-4}
         }
 
 
