@@ -208,7 +208,7 @@ class ParameterServer(object):
         for worker_id in range(0, self._workers_num):
             norm = torch.zeros(1)
             for name in keys:
-                norm.add_(mu_master[name].add(self._shards_weights[worker_id][name].mul(-1)).norm() ** 2)
+                norm.add_(mu_master[name].add(self._shards_weights[worker_id][name].mul(-1)).norm().cpu() ** 2)
             workers_norm_distances_mu.append(torch.sqrt(norm))
         workers_norm_distances_mu = torch.cat(workers_norm_distances_mu)
         mean_distance = torch.mean(workers_norm_distances_mu)
