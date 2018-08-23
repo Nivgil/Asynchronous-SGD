@@ -197,7 +197,7 @@ class ParameterServer(object):
         norm = torch.zeros(1)
         keys = mu_master.keys()
         for name in keys:
-            norm.add_(mu_mean[name].add(mu_master[name].mul(-1)).norm() ** 2)
+            norm.add_(mu_mean[name].add(mu_master[name].mul(-1)).norm().cpu() ** 2)
         return norm
 
     def get_workers_master_statistics(self):
