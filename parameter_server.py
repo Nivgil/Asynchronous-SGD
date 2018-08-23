@@ -185,10 +185,10 @@ class ParameterServer(object):
                 norm.add_(mu_mean[name].add(self._shards_weights[worker_id][name].mul(-1)).norm().cpu() ** 2)
             workers_norm_distances_mu.append(torch.sqrt(norm) / mu_mean_norm)
         workers_norm_distances_mu = torch.cat(workers_norm_distances_mu)
-        mean_distance = torch.mean(workers_norm_distances_mu)
-        min_distance = torch.min(workers_norm_distances_mu)
-        max_distance = torch.max(workers_norm_distances_mu)
-        std_distance = torch.std(workers_norm_distances_mu, unbiased=False)
+        mean_distance = torch.mean(workers_norm_distances_mu).item()
+        min_distance = torch.min(workers_norm_distances_mu).item()
+        max_distance = torch.max(workers_norm_distances_mu).item()
+        std_distance = torch.std(workers_norm_distances_mu, unbiased=False).item()
         return mean_distance, min_distance, max_distance, std_distance
 
     def get_mean_master_dist(self):
@@ -198,7 +198,7 @@ class ParameterServer(object):
         keys = mu_master.keys()
         for name in keys:
             norm.add_(mu_mean[name].add(mu_master[name].mul(-1)).norm().cpu() ** 2)
-        return norm
+        return norm.item()
 
     def get_workers_master_statistics(self):
 
@@ -211,10 +211,10 @@ class ParameterServer(object):
                 norm.add_(mu_master[name].add(self._shards_weights[worker_id][name].mul(-1)).norm().cpu() ** 2)
             workers_norm_distances_mu.append(torch.sqrt(norm))
         workers_norm_distances_mu = torch.cat(workers_norm_distances_mu)
-        mean_distance = torch.mean(workers_norm_distances_mu)
-        min_distance = torch.min(workers_norm_distances_mu)
-        max_distance = torch.max(workers_norm_distances_mu)
-        std_distance = torch.std(workers_norm_distances_mu, unbiased=False)
+        mean_distance = torch.mean(workers_norm_distances_mu).item()
+        min_distance = torch.min(workers_norm_distances_mu).item()
+        max_distance = torch.max(workers_norm_distances_mu).item()
+        std_distance = torch.std(workers_norm_distances_mu, unbiased=False).item()
 
         return mean_distance, min_distance, max_distance, std_distance
 
