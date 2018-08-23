@@ -68,7 +68,7 @@ class StatImage(object):
     def _visualize_weight_norm(self, handle=None, legend=None, color=None, resolution=None):
         if handle is None:
             return
-        norm = [x.numpy() for x in self._weight_norm]
+        norm = [x.cpu().numpy() for x in self._weight_norm]
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -79,7 +79,7 @@ class StatImage(object):
     def _visualize_gradient_norm(self, handle=None, legend=None, color=None, resolution=None):
         if handle is None:
             return
-        norm = [x.numpy() for x in self._gradient_norm]
+        norm = [x.cpu().numpy() for x in self._gradient_norm]
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -92,7 +92,7 @@ class StatImage(object):
     def _visualize_loss(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        loss = [x.numpy() for x in self._loss]
+        loss = [x.cpu().numpy() for x in self._loss]
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -103,7 +103,7 @@ class StatImage(object):
     def _visualize_error(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        error = [x.numpy() for x in self._error]
+        error = [x.cpu().numpy() for x in self._error]
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
