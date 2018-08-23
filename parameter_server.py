@@ -147,7 +147,7 @@ class ParameterServer(object):
 
     def _calc_workers_mean(self):
         mu_mean = {}
-        mu_mean_norm = torch.zeros(1)
+        mu_mean_norm = torch.zeros(1).cuda()
         keys = self._shards_weights[0].keys()
         for name in keys:
             mu_mean[name] = torch.zeros_like(self._shards_weights[0][name])
