@@ -126,7 +126,7 @@ class StatImage(object):
     def _visualize_mean_master_dist(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        distance = [x.numpy() for x in self._mean_master_dist]
+        distance = self._mean_master_dist
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
