@@ -112,7 +112,7 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
     p_weight_norm.legend.location = "top_left"
     p_gradient_norm.legend.click_policy = "hide"
     p_gradient_norm.legend.location = "bottom_left"
-
+    import ipdb; ipdb.set_trace()
     grid = column(row(p_loss, p_error), row(p_weight_norm, p_gradient_norm),
                   row(p_weights_mean_distances, p_weights_master_distances), p_mean_master_dist)
     html_norm = file_html(grid, CDN, folder_name)
@@ -194,7 +194,6 @@ def create_averaged_graph(sim_nums=None, resolution='epoch', linear=True, legend
     export_svgs(p_weight_norm, filename="weights_norm.svg")
     p_gradient_norm.output_backend = "svg"
     export_svgs(p_gradient_norm, filename="gradient_norm.svg")
-
 
 
 def get_average_graph_values(sim_nums=None):
