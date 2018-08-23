@@ -147,14 +147,14 @@ class ParameterServer(object):
 
     def _calc_workers_mean(self):
         mu_mean = {}
-        mu_mean_norm = torch.zeros(1).cuda()
+        mu_mean_norm = torch.zeros(1)
         keys = self._shards_weights[0].keys()
         for name in keys:
             mu_mean[name] = torch.zeros_like(self._shards_weights[0][name])
             for worker_id in range(0, self._workers_num):
                 mu_mean[name].add_(self._shards_weights[worker_id][name])
             mu_mean[name].mul_(1 / self._workers_num)
-            mu_mean_norm = mu_mean_norm + mu_mean[name].norm() ** 2
+            mu_mean_norm = mu_mean_norm + mu_mean[name].norm().cpu() ** 2
         return mu_mean, torch.sqrt(mu_mean_norm)
 
     def _step_norm(self, parameters):
