@@ -112,7 +112,6 @@ def create_graphs(sim_num=None, resolution='epoch', linear=False):
     p_weight_norm.legend.location = "top_left"
     p_gradient_norm.legend.click_policy = "hide"
     p_gradient_norm.legend.location = "bottom_left"
-    import ipdb; ipdb.set_trace()
     grid = column(row(p_loss, p_error), row(p_weight_norm, p_gradient_norm),
                   row(p_weights_mean_distances, p_weights_master_distances), p_mean_master_dist)
     html_norm = file_html(grid, CDN, folder_name)
