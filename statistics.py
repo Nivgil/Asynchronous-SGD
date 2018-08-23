@@ -62,8 +62,8 @@ class StatImage(object):
     def save_weight_master_dist(self, distance):
         self._weights_master_distance_stats.append(distance)
 
-    def save_mean_master_dist(self, dist):
-        self._mean_master_dist.append(dist.numpy()[0])
+    def save_mean_master_dist(self, distance):
+        self._mean_master_dist.append(distance)
 
     def _visualize_weight_norm(self, handle=None, legend=None, color=None, resolution=None):
         if handle is None:
