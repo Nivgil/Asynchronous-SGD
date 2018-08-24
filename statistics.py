@@ -44,14 +44,14 @@ class StatImage(object):
             norm = weights_dict['module.classifier.0.weight'].norm()  # TODO
         else:
             norm = weights_dict['module.fc.weight'].norm()
-        self._weight_norm.append(norm)
+        self._weight_norm.append(norm.item())
 
     def save_gradient_norm(self, weights_dict):
         if self._model == 'alexnet':
             norm = weights_dict['module.classifier.0.weight'].norm()
         else:
             norm = weights_dict['module.fc.weight'].norm()
-        self._gradient_norm.append(norm)
+        self._gradient_norm.append(norm.item())
 
     def save_step_norm(self, step_norm):
         self._step_norm.append(step_norm)
@@ -68,7 +68,7 @@ class StatImage(object):
     def _visualize_weight_norm(self, handle=None, legend=None, color=None, resolution=None):
         if handle is None:
             return
-        norm = [x.cpu().numpy() for x in self._weight_norm]
+        norm = self._weight_norm
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -79,7 +79,7 @@ class StatImage(object):
     def _visualize_gradient_norm(self, handle=None, legend=None, color=None, resolution=None):
         if handle is None:
             return
-        norm = [x.cpu().numpy() for x in self._gradient_norm]
+        norm = self._gradient_norm
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -92,7 +92,6 @@ class StatImage(object):
     def _visualize_loss(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        # loss = [x.cpu().numpy() for x in self._loss]
         loss = self._loss
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
@@ -104,8 +103,6 @@ class StatImage(object):
     def _visualize_error(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        import ipdb; ipdb.set_trace()
-        # error = [x.cpu().numpy() for x in self._error]
         error = self._error
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
