@@ -92,7 +92,8 @@ class StatImage(object):
     def _visualize_loss(self, handle=None, legend=None, color=None, line_dash=None, resolution=None):
         if handle is None:
             return
-        loss = [x.cpu().numpy() for x in self._loss]
+        # loss = [x.cpu().numpy() for x in self._loss]
+        loss = self._loss
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
@@ -104,7 +105,8 @@ class StatImage(object):
         if handle is None:
             return
         import ipdb; ipdb.set_trace()
-        error = [x.cpu().numpy() for x in self._error]
+        # error = [x.cpu().numpy() for x in self._error]
+        error = self._error
         if resolution == 'epoch':
             t = np.arange(1, self._epochs + 1)
         else:
