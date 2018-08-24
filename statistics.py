@@ -31,13 +31,13 @@ class StatImage(object):
         self._model = args.model
 
     def save_loss(self, loss):
-        self._loss.append(loss)
+        self._loss.append(loss.item())
 
     def save_error(self, error):
-        self._error.append(error / 100)
+        self._error.append(error.item() / 100)
 
     def save_error_top5(self, error):
-        self._error_top5.append(error / 100)
+        self._error_top5.append(error.item() / 100)
 
     def save_weight_norm(self, weights_dict):
         if self._model == 'alexnet':
