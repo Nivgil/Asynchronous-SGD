@@ -185,7 +185,7 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
         loss = criterion(output, target)
         loss.div_(batch_accumulate_num)  # instead of normalizing gradients
         loss.backward()
-        wd_pre_step(model)
+        # wd_pre_step(model)
         if grad_clip < 1000:
             torch.nn.utils.clip_grad_norm(model.parameters(), grad_clip)
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
