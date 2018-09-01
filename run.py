@@ -79,7 +79,7 @@ def seed_system(seed_val=None):
 
 
 if __name__ == '__main__':
-    seed_system(214)
+    seed_system(4527389)#
     warnings.filterwarnings('ignore')
     # torch.backends.cudnn.enabled = False
     main()
