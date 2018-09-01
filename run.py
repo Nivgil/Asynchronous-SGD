@@ -19,11 +19,11 @@ def main():
     base_name = args.name
     base_id = args.id
 
-    for idx in range(1, 2):
+    for idx in range(1, 6):
         args.id = base_id + idx - 1
-        # seed_val = random.randrange(10000000)
-        # seed_system(seed_val)
-        args.seed = 2113183
+        seed_val = random.randrange(10000000)
+        seed_system(seed_val)
+        args.seed = seed_val
         args.name = base_name + '_{}'.format(args.id)
         time = str(datetime.now())
         scores = exec_unit(args)
@@ -79,7 +79,7 @@ def seed_system(seed_val=None):
 
 
 if __name__ == '__main__':
-    seed_system(2113183)#
+    seed_system(214)
     warnings.filterwarnings('ignore')
     # torch.backends.cudnn.enabled = False
     main()
