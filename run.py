@@ -22,7 +22,7 @@ def main():
     for idx in range(1, 4):
         args.id = base_id + idx - 1
         # seed_val = random.randrange(10000000)
-        seed_val = seed_vals[idx]
+        seed_val = seed_vals[idx-1]
         seed_system(seed_val)
         args.seed = seed_val
         args.name = base_name + '_{}'.format(args.id)
