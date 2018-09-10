@@ -9,7 +9,7 @@ from torch.autograd import Variable
 
 
 class Bottleneck(nn.Module):
-    def __init__(self, inplanes, expansion=40, growthRate=12, dropRate=0):
+    def __init__(self, inplanes, expansion=4, growthRate=12, dropRate=0):
         super(Bottleneck, self).__init__()
         planes = expansion * growthRate
         self.bn1 = nn.BatchNorm2d(inplanes)
@@ -75,8 +75,8 @@ class Transition(nn.Module):
 
 class DenseNet(nn.Module):
 
-    def __init__(self, depth=22, block=Bottleneck,
-                 dropRate=0, num_classes=10, growthRate=12, compressionRate=2):
+    def __init__(self, depth=190, block=Bottleneck,
+                 dropRate=0, num_classes=10, growthRate=40, compressionRate=2):
         super(DenseNet, self).__init__()
 
         assert (depth - 4) % 3 == 0, 'depth should be 3n+4'
