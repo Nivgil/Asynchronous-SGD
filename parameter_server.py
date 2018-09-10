@@ -53,6 +53,7 @@ class ParameterServer(object):
             start_lr = 0
             self._lr = end_lr
             self._start_lr = start_lr
+            self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
             print('Learning Rate Warm Up [{:.5f}]->[{:.5f}]'.format(start_lr, end_lr))
 
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
@@ -108,12 +109,14 @@ class ParameterServer(object):
                 param_group['lr'] = lr
         else:
             if self._lr_warm_up is True:
-                self._start_lr = self._start_lr * 0.9 + 1
-                lr = 0.1 * self._start_lr
+                # self._start_lr = self._start_lr * 0.9 + 1
+                # lr = 0.1 * self._start_lr
+                self._start_lr = self._start_lr + self._lr_increment_const
+                lr = self._start_lr
                 print('Learning Rate Warm Up [{:.5f}]'.format(lr))
                 for param_group in self._optimizer.param_groups:
                     param_group['lr'] = lr
-                if np.abs(lr - self._lr) < 1e-3:
+                if np.abs(lr - self._lr) < 1e-5:
                     self._lr_warm_up = False
             else:
                 lr = self._lr
