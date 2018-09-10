@@ -76,7 +76,7 @@ class Transition(nn.Module):
 class DenseNet(nn.Module):
 
     def __init__(self, depth=190, block=Bottleneck,
-                 dropRate=0, num_classes=10, growthRate=40, compressionRate=2):
+                 dropRate=0, num_classes=10, growthRate=24, compressionRate=2):
         super(DenseNet, self).__init__()
 
         assert (depth - 4) % 3 == 0, 'depth should be 3n+4'
