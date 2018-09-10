@@ -14,7 +14,9 @@ class ParameterServer(object):
 
     @staticmethod
     def get_lr_reduce_epochs(model):
-        return {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160]}[model]
+        return \
+        {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160], 'densenet': [150, 225]}[
+            model]
 
     def __init__(self, model, args, **kwargs):
         self._model = deepcopy(model)
@@ -60,7 +62,7 @@ class ParameterServer(object):
                                           momentum=args.momentum,
                                           dampening=args.dampening,
                                           nesterov=args.nesterov,
-                                          weight_decay=args.weight_decay)#already done in train --- args.weight_decay)
+                                          weight_decay=args.weight_decay)  # already done in train --- args.weight_decay)
         # # debug dampening
         # self._model_dampening = deepcopy(model)
         # self._optimizer_dampening = torch.optim.SGD(self._model_dampening.parameters(), 1,
