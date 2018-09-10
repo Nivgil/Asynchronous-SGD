@@ -9,7 +9,7 @@ from torch.autograd import Variable
 
 
 class Bottleneck(nn.Module):
-    def __init__(self, inplanes, expansion=4, growthRate=12, dropRate=0):
+    def __init__(self, inplanes, expansion=40, growthRate=12, dropRate=0):
         super(Bottleneck, self).__init__()
         planes = expansion * growthRate
         self.bn1 = nn.BatchNorm2d(inplanes)
