@@ -58,11 +58,16 @@ class ParameterServer(object):
             self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
             print('Learning Rate Warm Up [{:.5f}]->[{:.5f}]'.format(start_lr, end_lr))
 
+        momentum = args.momentum if args.momentum >=0 else 0
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
-                                          momentum=args.momentum,
+                                          momentum=momentum,
                                           dampening=args.dampening,
                                           nesterov=args.nesterov,
                                           weight_decay=args.weight_decay)  # already done in train --- args.weight_decay)
+
+        if momentum != args.momentum:  # pytorch 0.4 workaround negative momentum is not allowed
+            for param_group in self._optimizer.param_groups:
+                param_group['momentum'] = args.momentum
         # # debug dampening
         # self._model_dampening = deepcopy(model)
         # self._optimizer_dampening = torch.optim.SGD(self._model_dampening.parameters(), 1,
