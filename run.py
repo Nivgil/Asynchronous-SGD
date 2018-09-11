@@ -19,10 +19,10 @@ def main():
     base_name = args.name
     base_id = args.id
     seed_vals = [8678576, 4527389, 2113183, 518078, 7370063]
-    for idx in range(1, 4):
+    for idx in range(1, 3):
         args.id = base_id + idx - 1
         # seed_val = random.randrange(10000000)
-        seed_val = seed_vals[idx-1]
+        seed_val = seed_vals[idx+2]
         seed_system(seed_val)
         args.seed = seed_val
         args.name = base_name + '_{}'.format(args.id)
