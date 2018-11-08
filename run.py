@@ -15,6 +15,7 @@ from datetime import datetime
 
 
 def main():
+    torch.distributed.init_process_group(backend='NCCL', init_method='env://')
     args = configuration()
     base_name = args.name
     base_id = args.id
@@ -22,7 +23,7 @@ def main():
     for idx in range(1, 6):
         args.id = base_id + idx - 1
         # seed_val = random.randrange(10000000)
-        seed_val = seed_vals[idx-1]
+        seed_val = seed_vals[idx - 1]
         seed_system(seed_val)
         args.seed = seed_val
         args.name = base_name + '_{}'.format(args.id)
