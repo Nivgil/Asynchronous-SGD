@@ -62,7 +62,8 @@ def configuration():
                         help='chosen architecture')
     parser.add_argument('--notes', default='', type=str,
                         help='notes for simulation')
-    parser.add_argument("--local_rank", type=int)  # distributed support
+    parser.add_argument("--local_rank", type=int, default=0,
+                        help='index of node in computing cluster')  # distributed support
     parser.set_defaults(augment=True)
     args = parser.parse_args()
     if args.model == 'wideresnet':

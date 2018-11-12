@@ -14,7 +14,6 @@ def send_notification(msg_text_1, msg_text_2, graph_path, args):
 
     body = msg_text_1 + '\n\n\n'
     msg.attach(MIMEText(body, 'plain'))
-    import ipdb; ipdb.set_trace()
     body = dict_to_table(msg_text_2)
     msg.attach(MIMEText(body, 'plain'))
 
