@@ -58,7 +58,7 @@ class ParameterServer(object):
             self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
             print('Learning Rate Warm Up [{:.5f}]->[{:.5f}]'.format(start_lr, end_lr))
 
-        momentum = args.momentum if args.momentum >=0 else 0
+        momentum = args.momentum if args.momentum >= 0 else 0
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
                                           momentum=momentum,
                                           dampening=args.dampening,
