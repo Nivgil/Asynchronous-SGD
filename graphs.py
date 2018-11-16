@@ -159,7 +159,6 @@ def create_averaged_graph(sim_nums=None, resolution='epoch', linear=True, legend
 
     for idx, sim_set in enumerate(sim_nums):
         train_loss, train_error, weight_norm, gradient_norm, test_loss, test_error = get_average_graph_values(sim_set)
-
         t = np.arange(1, len(train_loss) + 1)
         p_loss.line(t, train_loss, line_width=3, line_dash='dashed', legend=legend[idx] + ' - train',
                     line_color=colors[idx])
@@ -182,17 +181,16 @@ def create_averaged_graph(sim_nums=None, resolution='epoch', linear=True, legend
     p_gradient_norm.legend.click_policy = "hide"
     p_gradient_norm.legend.location = "bottom_left"
 
-    p_loss.output_backend = "svg"
-    export_svgs(p_loss, filename="loss.svg")
-
-    p_loss.output_backend = "svg"
-    export_svgs(p_loss, filename="loss.svg")
-    p_error.output_backend = "svg"
-    export_svgs(p_error, filename="error.svg")
-    p_weight_norm.output_backend = "svg"
-    export_svgs(p_weight_norm, filename="weights_norm.svg")
-    p_gradient_norm.output_backend = "svg"
-    export_svgs(p_gradient_norm, filename="gradient_norm.svg")
+    # p_loss.output_backend = "svg"
+    # export_svgs(p_loss, filename="loss.svg")
+    # p_error.output_backend = "svg"
+    # export_svgs(p_error, filename="error.svg")
+    output_file('error.html')
+    save(p_error)
+    # p_weight_norm.output_backend = "svg"
+    # export_svgs(p_weight_norm, filename="weights_norm.svg")
+    # p_gradient_norm.output_backend = "svg"
+    # export_svgs(p_gradient_norm, filename="gradient_norm.svg")
 
 
 def get_average_graph_values(sim_nums=None):
@@ -207,7 +205,7 @@ def get_average_graph_values(sim_nums=None):
     for sim_num in sim_nums:
         folder_name = 'outputs/simulation_{}'.format(sim_num)
         for file in os.listdir(os.path.join(CONFIGURATIONS_DIR, folder_name)):
-            if file.endswith('.log'):
+            if file.endswith('.log') or '.' in file:
                 continue
             with open(os.path.join(CONFIGURATIONS_DIR, folder_name, file), 'rb') as pickle_in:
                 stats_test, stats_train = pickle.load(pickle_in)

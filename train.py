@@ -10,6 +10,7 @@ from copy import deepcopy
 import numpy as np
 
 from models.models import get_model
+from utils.cross_entropy import  CrossEntropyLoss
 
 from data import load_data
 from parameter_server import ParameterServer
@@ -102,7 +103,11 @@ def main(args):
 
     cudnn.benchmark = True
     # define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
+    loss_params = {}
+    if args.label_smoothing > 0:
+        loss_params['smooth_eps'] = args.label_smoothing
+    criterion = getattr(model, 'criterion', CrossEntropyLoss)(**loss_params).cuda()
+    # criterion = nn.CrossEntropyLoss().cuda()
     if args.bar is True:
         train_bar = IncrementalBar('Training  ', max=args.iterations_per_epoch, suffix='%(percent)d%%')
         val_bar = IncrementalBar('Evaluating', max=val_len, suffix='%(percent)d%%')

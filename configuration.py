@@ -18,6 +18,8 @@ def configuration():
     parser.add_argument('--nesterov', dest='nesterov', action='store_true', help='nesterov momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
                         help='weight decay (default: 1e-4)')
+    parser.add_argument('--label-smoothing', default=0, type=float,
+                        help='label smoothing coefficient - default 0')
     parser.add_argument('--layers', default=28, type=int,
                         help='total number of layers (default: 28)')
     parser.add_argument('--widen-factor', default=2, type=int,
