@@ -15,7 +15,7 @@ from datetime import datetime
 
 
 def main():
-    torch.distributed.init_process_group(backend='gloo', init_method='tcp://132.68.43.137:29500')
+    # torch.distributed.init_process_group(backend='gloo', init_method='tcp://132.68.43.137:29500')
     args = configuration()
     base_name = args.name
     base_id = args.id
