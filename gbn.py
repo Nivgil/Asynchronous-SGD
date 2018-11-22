@@ -4,7 +4,7 @@ from torch.nn import Module, BatchNorm2d
 
 class GhostBatchNorm(Module):
 
-    def __init__(self, num_features, chunk_size=128, momentum=0.1):
+    def __init__(self, num_features, chunk_size=16, momentum=0.1):
         super(GhostBatchNorm, self).__init__()
         self.bn = BatchNorm2d(num_features, momentum=momentum)
         self.num_features = num_features
