@@ -77,12 +77,17 @@ def load_data(args):
             normalize
         ])
 
+        if args.batch_size > 2048:
+            batch_size = 256
+        else:
+            batch_size = args.batch_size
+
         kwargs = {'num_workers': 8, 'pin_memory': True}
         assert (args.dataset == 'cifar10' or args.dataset == 'cifar100')
         train_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
                                                     transform=transform_train),
-            batch_size=args.batch_size, shuffle=True, drop_last=True, **kwargs)
+            batch_size=batch_size, shuffle=True, drop_last=True, **kwargs)
         val_loader = torch.utils.data.DataLoader(
             datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
             batch_size=1024, shuffle=False, drop_last=True, **kwargs)
