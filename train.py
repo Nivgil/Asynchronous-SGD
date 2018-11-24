@@ -38,7 +38,11 @@ def main(args):
             args.iterations_per_epoch = len(train_loader.dataset.imgs) // args.batch_size
         val_len = len(val_loader.dataset.imgs) // 1024
     else:
-        args.iterations_per_epoch = len(train_loader.dataset.train_labels) // args.batch_size
+        if batch_accumulate_num > 1:
+            args.iterations_per_epoch = len(train_loader.dataset.train_labels) // 256
+        else:
+            args.iterations_per_epoch = len(train_loader.dataset.train_labels) // args.batch_size
+
         val_len = len(val_loader.dataset.test_labels) // 1024
 
     # get the number of model parameters
