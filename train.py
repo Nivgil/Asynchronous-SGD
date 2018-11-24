@@ -26,7 +26,7 @@ def main(args):
     train_loader, val_loader = load_data(args)
     model = get_model(args.model, args)
 
-    if args.batch_size > 256 and args.dataset == 'imagenet' and args.model == 'resnet':
+    if args.batch_size > 256:  # and args.dataset == 'imagenet' and args.model == 'resnet':
         batch_accumulate_num = args.batch_size // 256
     else:
         batch_accumulate_num = 1

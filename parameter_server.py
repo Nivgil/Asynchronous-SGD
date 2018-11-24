@@ -15,8 +15,8 @@ class ParameterServer(object):
     @staticmethod
     def get_lr_reduce_epochs(model):
         return \
-        {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160], 'densenet': [150, 225]}[
-            model]
+            {'resnet': [30, 60, 80], 'alexnet': [10, 15, 20, 25], 'wideresnet': [60, 120, 160], 'densenet': [150, 225]}[
+                model]
 
     def __init__(self, model, args, **kwargs):
         self._model = deepcopy(model)
@@ -40,6 +40,7 @@ class ParameterServer(object):
             alpha = args.workers_num * args.batch_size // batch_baseline
             self._lr_points = [x * alpha for x in self._lr_points]
             print('Regime Adaptation - LR Reduce at {}'.format(self._lr_points))
+            logging.info('Regime Adaptation - LR Reduce at {}'.format(self._lr_points), extra=self._client)
         if args.fast_im is True:
             end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
             start_lr = args.lr / (args.workers_num)
@@ -47,6 +48,8 @@ class ParameterServer(object):
             self._start_lr = start_lr
             self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
             print('Fast ImageNet Mode - Warm Up [{:.5f}]->[{:.5f}] In 5 Epochs'.format(start_lr, end_lr))
+            logging.info('Fast ImageNet Mode - Warm Up [{:.5f}]->[{:.5f}] In 5 Epochs'.format(start_lr, end_lr),
+                         extra=self._client)
         else:
             self._start_lr = 0
             self._lr_increment_const = 0
@@ -57,6 +60,7 @@ class ParameterServer(object):
             self._start_lr = start_lr
             self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
             print('Learning Rate Warm Up [{:.5f}]->[{:.5f}]'.format(start_lr, end_lr))
+            logging.info('Learning Rate Warm Up [{:.5f}]->[{:.5f}]'.format(start_lr, end_lr), extra=self._client)
 
         momentum = args.momentum if args.momentum >= 0 else 0
         self._optimizer = torch.optim.SGD(self._model.parameters(), args.lr,
