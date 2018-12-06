@@ -117,8 +117,13 @@ class ParameterServer(object):
                 weight.grad = gradients[name]
         for name, val in self._model.named_modules():
             if 'bn' in name:
-                val.running_mean = gradients[name + '.running_mean']
-                val.running_var = gradients[name + '.running_var']
+                if torch.cuda.is_available() is True:
+                    val.running_mean = gradients[name + '.running_mean'].cuda()
+                    val.running_var = gradients[name + '.running_var'].cuda()
+                else:
+                    val.running_mean = gradients[name + '.running_mean']
+                    val.running_var = gradients[name + '.running_var']
+
 
     def _adjust_learning_rate(self, epoch, iteration):
         lr = self._start_lr + self._lr_increment_const * (iteration + self._iterations_per_epoch * epoch)

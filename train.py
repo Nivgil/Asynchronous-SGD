@@ -250,6 +250,14 @@ def set_model_weights(weights, model):
             weight.data = weights[name].cuda()
         else:
             weight.data = weights[name]
+    for name, val in model.named_modules():
+        if 'bn' in name:
+            if torch.cuda.is_available() is True:
+                val.running_mean = weights[name + '.running_mean'].cuda()
+                val.running_var = weights[name + '.running_var'].cuda()
+            else:
+                val.running_mean = weights[name + '.running_mean']
+                val.running_var = weights[name + '.running_var']
 
 
 def get_model_gradients(model):
