@@ -250,16 +250,6 @@ class ASGD(ParameterServer):
         self._adjust_momentum(epoch, kwargs['iteration'])
         self._adjust_learning_rate(epoch, kwargs['iteration'])
         self._optimizer.zero_grad()
-        # # debug dampening
-        # self._optimizer_dampening.zero_grad()
-        # for name, weight in self._model_dampening.named_parameters():
-        #     if torch.cuda.is_available() is True:
-        #         weight.grad = parameters[name].cuda()
-        #     else:
-        #         weight.grad = parameters[name]
-        # self._optimizer_dampening.step()
-        # # debug end dampening
-
         self._set_model_gradients(deepcopy(parameters))
         self._optimizer.step()
         self._shards_weights[worker_id] = self._get_model_weights()
