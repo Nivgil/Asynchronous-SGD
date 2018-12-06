@@ -90,6 +90,10 @@ class ParameterServer(object):
         parameters = {}
         for name, weight in self._model.named_parameters():
             parameters[name] = weight.data.clone()
+        for name, val in self._model.named_modules():
+            if 'bn' in name:
+                parameters[name + '.running_mean'] = val.running_mean.clone()
+                parameters[name + '.running_var'] = val.running_var.clone()
         return parameters
 
     def _set_model_weights(self, weights):
@@ -111,6 +115,10 @@ class ParameterServer(object):
                 weight.grad = gradients[name].cuda()
             else:
                 weight.grad = gradients[name]
+        for name, val in self._model.named_modules():
+            if 'bn' in name:
+                val.running_mean = gradients[name + '.running_mean']
+                val.running_var = gradients[name + '.running_var']
 
     def _adjust_learning_rate(self, epoch, iteration):
         lr = self._start_lr + self._lr_increment_const * (iteration + self._iterations_per_epoch * epoch)

@@ -256,6 +256,10 @@ def get_model_gradients(model):
     gradients = {}
     for name, weight in model.named_parameters():
         gradients[name] = weight.grad.clone()
+    for name, val in model.named_modules():
+        if 'bn' in name:
+            gradients[name + '.running_mean'] = val.running_mean.clone()
+            gradients[name + '.running_var'] = val.running_var.clone()
     return gradients
 
 
