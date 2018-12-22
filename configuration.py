@@ -22,8 +22,8 @@ def configuration():
                         help='label smoothing coefficient - default 0')
     parser.add_argument('--layers', default=28, type=int,
                         help='total number of layers (default: 28)')
-    parser.add_argument('--widen-factor', default=2, type=int,
-                        help='widen factor (default: 2)')
+    parser.add_argument('--widen-factor', default=10, type=int,
+                        help='widen factor (default: 10)')
     parser.add_argument('--droprate', default=0, type=float,
                         help='dropout probability (default: 0.0)')
     parser.add_argument('--no-augment', dest='augment', action='store_false',
