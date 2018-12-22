@@ -38,9 +38,9 @@ def configuration():
                         help='gradient clipping threshold')
     parser.add_argument('--no_pbar', dest='bar', action='store_false',
                         help='show progress bar (default: False)')
-    parser.add_argument('--no_regime', dest='regime', action='store_false',
-                        help='train without regime adaptation')
-    parser.add_argument('--fast_im', dest='fast_im', action='store_true',
+    parser.add_argument('--full_regime', dest='full_regime', action='store_true',
+                        help='train with regime adaptation - train longer')
+    parser.add_argument('--fast_regime', dest='fast_regime', action='store_true',
                         help='1 hour image net training regime')
     parser.add_argument('--m_off', dest='m_off', action='store_true',
                         help='Turn off momentum after warm up')
@@ -76,10 +76,6 @@ def configuration():
             args.save = 5
         args.save = 1
         args.baseline = 256
-    if args.fast_im is True:
-        args.regime = False
-        # args.nesterov = True
     args.name = args.model
-    if args.lr_warm_up is True and args.momentum > 0:
-        Exception('Learning Rate Warm up Can\'t Run With Momentum')
+    assert args.full_regime and args.fast_regime
     return args
