@@ -78,13 +78,6 @@ class ParameterServer(object):
                 parameters[name + '.running_var'] = val.running_var.clone()
         return parameters
 
-    # def _set_model_weights(self, weights):
-    #     for name, weight in self._model.named_parameters():
-    #         if torch.cuda.is_available() is True:
-    #             weight = weights[name].cuda()
-    #         else:
-    #             weight = weights[name]
-
     def _get_model_gradients(self):
         gradients = {}
         for name, weight in self._model.named_parameters():

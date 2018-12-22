@@ -69,42 +69,6 @@ def main(args):
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
-    # # Synchronous to Asynchronous Adjustments
-    # print('Resetting Parameter Server to Asynchronous Mode')
-    # logging.info('Resetting Parameter Server to Asynchronous Mode', extra=args.client)
-    # server._shards_weights = list()
-    # weights = server._get_model_weights()
-    # for i in range(0, args.workers_num):
-    #     server._shards_weights.append(deepcopy(weights))
-    # server._workers_num = args.workers_num
-    # # learning rate initialization
-    # batch_baseline = args.baseline
-    # server._lr = args.lr * np.sqrt((args.workers_num * args.batch_size) // batch_baseline) / (args.workers_num)
-    # server._fast_im = args.fast_im
-    # server._lr_warm_up = args.lr_warm_up
-    # server._current_lr = args.lr
-    # server._m_off = args.m_off
-    # server._current_momentum = args.momentum
-    # server._iterations_per_epoch = args.iterations_per_epoch
-    # server._momentum = args.momentum
-    # server._client = args.client
-    # if args.fast_im is True:
-    #     end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
-    #     start_lr = args.lr / (args.workers_num)
-    #     server._lr = end_lr
-    #     server._start_lr = start_lr
-    #     server._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
-    #     log_str = 'Fast ImageNet Mode - Warm Up [{:.5f}]->[{:.5f}] In 5 Epochs'.format(start_lr, end_lr)
-    #     logging.info(log_str, extra=args.client)
-    #     print(log_str)
-    # else:
-    #     server._start_lr = 0
-    #     server._lr_increment_const = 0
-    # for param_group in server._optimizer.param_groups:
-    #     param_group['lr'] = start_lr
-    #     param_group['momentum'] = server._momentum
-    # # Synchronous to Asynchronous Adjustments - End
-
     cudnn.benchmark = True
     # define loss function (criterion) and optimizer
     loss_params = {}
@@ -181,6 +145,7 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
     # switch to train mode
     model.train()
 
+    import ipdb; ipdb.set_trace()
     for i, (input, target) in enumerate(train_loader):
         current_accumulate_num = i % batch_accumulate_num
         current_worker = (i // batch_accumulate_num) % workers_number
@@ -244,7 +209,6 @@ def validate(data_loader, model, criterion, server, statistics, bar):
 
 def set_model_weights(weights, model):
     for name, weight in model.named_parameters():
-        # omit 'module.' in name string -> name[7:]
         if torch.cuda.is_available() is True:
             weight.data = weights[name].cuda()
         else:
