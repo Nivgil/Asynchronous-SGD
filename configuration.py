@@ -20,6 +20,8 @@ def configuration():
                         help='weight decay (default: 1e-4)')
     parser.add_argument('--label-smoothing', default=0, type=float,
                         help='label smoothing coefficient - default 0')
+    parser.add_argument('--duplicates', default=1, type=int,
+                        help='number of batch duplications (Batch Augmentation)')
     parser.add_argument('--layers', default=28, type=int,
                         help='total number of layers (default: 28)')
     parser.add_argument('--widen-factor', default=10, type=int,
