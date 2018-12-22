@@ -77,5 +77,5 @@ def configuration():
         args.save = 1
         args.baseline = 256
     args.name = args.model
-    assert args.full_regime and args.fast_regime
+    assert (args.full_regime and args.fast_regime) is False
     return args
