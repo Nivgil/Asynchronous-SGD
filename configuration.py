@@ -44,8 +44,6 @@ def configuration():
                         help='1 hour image net training regime')
     parser.add_argument('--m_off', dest='m_off', action='store_true',
                         help='Turn off momentum after warm up')
-    parser.add_argument('--lr_warm_up', dest='lr_warm_up', action='store_true',
-                        help='warm up learning rate instead of using momentum')
     parser.add_argument('--gbn', dest='gbn', action='store_true',
                         help='ghost batch normalization')
     parser.add_argument('--id', default=9000, type=int,
