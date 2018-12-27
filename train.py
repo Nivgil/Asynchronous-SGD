@@ -145,7 +145,6 @@ def train(train_loader, model, criterion, server, epoch, workers_number, grad_cl
     # switch to train mode
     model.train()
 
-    import ipdb; ipdb.set_trace()
     for i, (input, target) in enumerate(train_loader):
         current_accumulate_num = i % batch_accumulate_num
         current_worker = (i // batch_accumulate_num) % workers_number
