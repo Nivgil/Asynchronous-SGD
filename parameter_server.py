@@ -41,7 +41,7 @@ class ParameterServer(object):
             logging.info('Regime Adaptation - LR Reduce at {}'.format(self._lr_points), extra=self._client)
         if args.fast_regime is True:
             end_lr = args.lr * ((args.workers_num * args.batch_size) // batch_baseline) / np.sqrt(args.workers_num)
-            start_lr = args.lr / args.workers_num
+            start_lr = args.lr / np.sqrt(args.workers_num)
             self._lr = end_lr
             self._start_lr = start_lr
             self._lr_increment_const = (end_lr - start_lr) / (args.iterations_per_epoch * 5)
